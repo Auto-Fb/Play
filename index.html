@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JHON v2 - Universal Auto Post Tools</title>
+<style>
+:root{--bg:#1e2130;--panel:#2a2f45;--panel2:#242840;--line:#3d4362;--txt:#f1f3fa;--mut:#b8bfda;--dim:#8b93b8;--ok:#38bdf8;--accent:#818cf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);background-image:radial-gradient(circle at 20% 0%,#2d3252 0%,var(--bg) 55%);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:13px}
+header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:rgba(42,47,69,.5);backdrop-filter:blur(6px);flex-wrap:wrap;gap:10px}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--ok));color:#fff;border-radius:10px;display:grid;place-items:center;font-weight:800;box-shadow:0 4px 14px rgba(129,140,248,.35)}
+.wrap{max-width:1400px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.card h3{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--txt)}
+textarea{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;font-family:monospace;font-size:11px;resize:vertical}
+input,select{width:100%;height:34px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:0 10px;margin-top:6px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(129,140,248,.25)}
+input[type=checkbox]{width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent)}
+.btn{height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer;font-size:12px;transition:filter .15s}
+.btn:hover{filter:brightness(1.2)}
+.btn.w{background:#fff;color:#161a2c;font-weight:700;border-color:#fff}
+.btn.ok{background:linear-gradient(135deg,var(--ok),var(--accent));color:#fff;border-color:transparent;font-weight:700}
+.btn.danger{background:#7f1d1d;color:#fff;border-color:#7f1d1d}
+.big{height:44px;width:100%;border-radius:12px;font-weight:700}
+.pill{font-size:10px;padding:4px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
+.log{height:90px;overflow:auto;background:#14172a;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:monospace;font-size:10px;color:#4ade80;margin-top:8px}
+.step{border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:6px;background:var(--panel2);font-size:11px}
+.hint{font-size:10px;color:var(--dim);margin-top:6px}
+pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px solid var(--line);padding:10px;border-radius:10px;max-height:400px;overflow:auto;font-size:10px;color:#e2e4f0}
+.badge-jhon{display:inline-block;font-size:9px;padding:2px 6px;border-radius:99px;background:#818cf830;color:#c7d2fe;border:1px solid #818cf860}
+.link-box{background:linear-gradient(135deg,#0ea5e920,#7C3AED20);border:1px solid #0ea5e960;border-radius:10px;padding:10px;margin-top:10px}
+.link-box label{display:flex;align-items:center;gap:8px;font-size:11px;cursor:pointer;color:var(--txt)}
+.save-box{background:linear-gradient(135deg,#10b98115,#0ea5e915);border:1px solid #10b98140;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.save-box .s-info{flex:1}
+.save-box .s-title{font-size:11px;font-weight:700;color:#6ee7b7}
+.save-box .s-status{font-size:10px;color:#888;margin-top:2px}
+.save-box .s-btn{padding:6px 10px;border-radius:8px;border:1px solid #ef444450;background:#1a1a1a;color:#fca5a5;font-size:10px;font-weight:700;cursor:pointer}
+.tabs{display:flex;gap:4px;margin-bottom:10px}
+.tab{flex:1;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;text-align:center;transition:all .15s}
+.tab.active{background:linear-gradient(135deg,#7C3AED,#EC4899);border-color:transparent;color:#fff}
+.tab:hover:not(.active){background:#2f3550}
+.tpl-item{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .15s;font-size:11px;position:relative}
+.tpl-item:hover{border-color:var(--accent);background:#2f3550}
+.tpl-item.active{border-color:#7C3AED;background:linear-gradient(135deg,#7C3AED15,#EC489915);box-shadow:0 0 0 2px rgba(124,58,237,.3)}
+.tpl-item .tpl-title{font-weight:700;color:#fff;margin-bottom:3px;padding-right:40px}
+.tpl-item .tpl-desc{font-size:10px;color:var(--dim);line-height:1.4}
+.tpl-item .tpl-delete{position:absolute;top:8px;right:8px;padding:3px 8px;background:#7f1d1d;color:#fff;border:0;border-radius:6px;font-size:10px;cursor:pointer}
+.tpl-item .tpl-delete:hover{background:#991b1b}
+.tpl-save-box{background:linear-gradient(135deg,#10b98110,#0ea5e910);border:1px dashed #10b98160;border-radius:10px;padding:10px;margin-top:10px}
+.env-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:99px;background:#0ea5e920;color:#7dd3fc;border:1px solid #0ea5e940;margin-left:6px}
+/* LICENSE */
+#licenseGate{position:fixed;inset:0;background:rgba(10,10,15,.97);backdrop-filter:blur(10px);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.license-card{max-width:420px;width:100%;background:#14182a;border:1px solid #7C3AED80;border-radius:20px;padding:24px 20px;text-align:center;box-shadow:0 0 40px rgba(124,58,237,.35);margin:auto}
+.license-title{font-weight:900;font-size:20px;margin-bottom:6px;color:#fff;letter-spacing:.02em}
+.license-sub{font-size:11px;color:#9ca3af;margin-bottom:16px;line-height:1.7}
+.license-input{text-align:center;letter-spacing:.15em;text-transform:uppercase;font-weight:800;font-size:14px;height:46px}
+.btn-license{width:100%;height:46px;border-radius:12px;border:0;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;font-weight:800;font-size:13px;cursor:pointer;margin-top:12px;transition:filter .15s}
+.btn-license:hover{filter:brightness(1.1)}
+.btn-license:disabled{opacity:.6;cursor:wait}
+#licenseMsg{margin-top:14px;font-size:12px;line-height:1.6;min-height:20px;font-weight:600}
+.wa-box{margin-top:16px;background:linear-gradient(135deg,#7C3AED15,#EC489915);border:1px solid #7C3AED40;border-radius:12px;padding:14px;text-align:center}
+.wa-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:4px}
+.wa-sub{font-size:11px;color:#b8bfda;margin-bottom:10px;line-height:1.5}
+.wa-btn{display:inline-block;padding:11px 20px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:999px;font-size:12px;font-weight:800;text-decoration:none;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.warn-box{margin-top:12px;background:#f59e0b15;border:1px solid #f59e0b40;border-radius:10px;padding:10px;font-size:10px;color:#fcd34d;line-height:1.6;text-align:left}
+#activeBadge{position:fixed;top:8px;right:8px;z-index:99999;font-size:9px;padding:4px 8px;border-radius:99px;background:#10B98120;color:#6EE7B7;border:1px solid #10B98150;font-family:monospace;display:none}
+#saveStatus{font-size:9px;padding:3px 8px;border-radius:99px;background:#10b98120;color:#6ee7b7;border:1px solid #10b98140;margin-left:8px;display:none}
+</style>
+</head>
+<body>
+
+<!-- LICENSE GATE -->
+<div id="licenseGate">
+  <div class="license-card">
+    <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#7C3AED,#EC4899);display:grid;place-items:center;margin:0 auto 14px;font-weight:900;font-size:24px">🔒</div>
+    <div class="license-title">AKTIVASI TOOLS</div>
+    <div class="license-sub">Masukkan kode lisensi dari penjual.<br>1 kode = 1 device • Aktivasi instan</div>
+    <input type="text" id="licenseInput" class="license-input" placeholder="JHON-XXXX-XXXX" autocomplete="off" spellcheck="false">
+    <button class="btn-license" id="licenseSubmitBtn" type="button">▶ Aktifkan Lisensi</button>
+    <div id="licenseMsg"></div>
+    <div class="warn-box">
+      ⚠️ <b>Penting:</b> Jangan hapus data browser / ganti browser setelah aktivasi.
+      Kode terikat ke device ini. Kalau perlu ganti device, hubungi penjual untuk reset.
+    </div>
+    <div class="wa-box">
+      <div class="wa-title">🔑 Belum punya kode lisensi?</div>
+      <div class="wa-sub">Hubungi penjual untuk kode resmi!<br>1 kode = 1 device • Support lifetime</div>
+      <a href="https://wa.me/6281234567890?text=Halo%20bos%2C%20mau%20beli%20kode%20lisensi%20JHON%20v2" target="_blank" class="wa-btn" id="waCta">💬 Hubungi Penjual di WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVE BADGE -->
+<div id="activeBadge">✅ LISENSI AKTIF</div>
+
+<!-- APP -->
+<div id="appContent" style="display:none;">
+<header>
+<div style="display:flex;gap:10px;align-items:center">
+  <div class="logo">JH</div>
+  <div>
+    <b>JHON v2</b> <span class="badge-jhon">UNIVERSAL</span> <span class="env-badge" id="envBadge">AUTO-DETECT</span>
+    <br><small style="color:var(--dim)">Template + Excel → Universal Player (Lemur + Desktop)</small>
+  </div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+  <span class="pill" id="envPill">🌐 Loading env...</span>
+  <span id="saveStatus">✓ Autosave</span>
+</div>
+</header>
+
+<div class="wrap">
+<!-- KOLOM 1: TEMPLATE / JSON -->
+<div class="card">
+<h3>1️⃣ STEP CONFIG</h3>
+
+<!-- AUTOSAVE -->
+<div class="save-box">
+  <div class="s-info">
+    <div class="s-title">💾 Autosave Aktif</div>
+    <div class="s-status" id="autosaveStatus">Data tersimpan otomatis — aman walau refresh</div>
+  </div>
+  <button class="s-btn" onclick="clearAutosave()">🗑️ Hapus</button>
+</div>
+
+<div class="tabs">
+<div class="tab active" data-tab="tpl" onclick="switchTab('tpl')">📋 Template Saya</div>
+<div class="tab" data-tab="json" onclick="switchTab('json')">📝 Custom JSON</div>
+</div>
+
+<div id="tab-tpl">
+<p class="hint">Template yang lu save sendiri. Rekam dulu → paste JSON → Save. Nanti tinggal klik.</p>
+<div id="tplList"></div>
+
+<div class="tpl-save-box">
+  <div style="font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:6px">💾 Simpan sebagai Template Baru</div>
+  <input id="newTplName" placeholder="Nama template (contoh: FB Page Footer)" style="margin-top:0">
+  <button class="btn ok" style="width:100%;margin-top:8px" onclick="saveAsTemplate()">💾 SAVE TEMPLATE</button>
+  <div class="hint" style="margin-top:6px">Yang di-save = JSON yang ada di tab "Custom JSON" saat ini.</div>
+</div>
+</div>
+
+<div id="tab-json" style="display:none">
+<p class="hint">Paste JSON dari JHON RECORDER:</p>
+<textarea id="jsonIn" placeholder='[{"type":"CLICK","selector":"..."}]'></textarea>
+<div style="display:flex;gap:6px;margin-top:8px">
+<button class="btn" onclick="loadContoh()">Contoh</button>
+<button class="btn" onclick="formatJson()">Format</button>
+<button class="btn" onclick="clearJson()">Clear</button>
+</div>
+<div id="jsonPreview" style="margin-top:10px"></div>
+</div>
+
+<div id="activeSteps" style="margin-top:12px"></div>
+</div>
+
+<!-- KOLOM 2: EXCEL -->
+<div class="card">
+<h3>2️⃣ EXCEL TARGET (XLSX)</h3>
+<p class="hint">Upload Excel. Pilih kolom & gabungkan.</p>
+<input type="file" id="xlsFile" accept=".xlsx,.xls,.csv">
+<select id="sheetSel" style="display:none"></select>
+<div id="colSelWrap" style="display:none;margin-top:8px">
+<label style="font-size:10px;color:var(--dim)">Pilih kolom yang mau digabung:</label>
+<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;margin-top:4px"><input type="checkbox" id="colCheckAll"> <span>✔ Centang Semua</span></label>
+<div id="colCheckWrap" style="max-height:160px;overflow:auto;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:4px"></div>
+<label style="font-size:10px;color:var(--dim);margin-top:8px;display:block">Pemisah:</label>
+<select id="colSep" style="margin-top:4px">
+<option value=" " selected>Spasi ( )</option>
+<option value=" - ">Strip ( - )</option>
+<option value=", ">Koma (, )</option>
+<option value="\n">Baris baru (\n)</option>
+<option value="">Tanpa pemisah</option>
+</select>
+</div>
+
+<div class="link-box" style="opacity:.75">
+<label><input type="checkbox" id="autoRemoveLink" disabled><b>🔗 Auto-hapus URL</b> <span style="color:#f59e0b;font-size:10px">(OFF)</span></label>
+<div class="hint" style="color:#fca5a5;margin-top:4px">⚠️ URL dibiarkan. Preview muncul, link tetap ada di text.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+<label style="font-size:10px">Preview wait (detik)<input type="number" id="previewWait" value="3" min="1" max="10"></label>
+<label style="font-size:10px">Delay post (auto/kosong=auto)<input type="text" id="delay" value="auto" placeholder="auto"></label>
+</div>
+<label style="font-size:10px;margin-top:8px;display:block">Type speed (0=auto)<input type="number" id="typeSpeed" value="0"></label>
+</div>
+
+<div id="xlsPreview" style="margin-top:10px"></div>
+<div class="log" id="xlsLog">Belum ada Excel</div>
+</div>
+
+<!-- KOLOM 3: GENERATE -->
+<div class="card">
+<h3>3️⃣ GENERATE UNIVERSAL PLAYER</h3>
+<button class="btn ok big" id="btnGen">⚡ GENERATE PLAYER</button>
+<div style="display:flex;gap:6px;margin-top:10px">
+<button class="btn w" id="btnCopy" style="flex:1">Copy Script</button>
+<button class="btn" id="btnSave" style="flex:1">Save .js</button>
+</div>
+<pre id="outScript" style="margin-top:10px">Belum di-generate...</pre>
+<div class="hint" id="genInfo"></div>
+
+<h3 style="margin-top:16px">📋 Cara Pakai:</h3>
+<ol style="font-size:11px;color:var(--mut);line-height:1.6;padding-left:16px">
+<li>Rekam di FB pakai <b>JHON RECORDER</b></li>
+<li>Copy JSON → paste di <b>Custom JSON</b></li>
+<li><b>Save Template</b> dengan nama (biar nanti tinggal pilih)</li>
+<li>Upload <b>Excel</b> target</li>
+<li>GENERATE → Copy</li>
+<li>Paste ke Tampermonkey script baru</li>
+<li>Buka FB → badge 📢 JHON → PLAY</li>
+</ol>
+
+<div style="margin-top:12px;padding:10px;background:linear-gradient(135deg,#10b98115,#0ea5e915);border:1px solid #10b98140;border-radius:10px">
+<div style="font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:4px">✨ Universal Player</div>
+<div style="font-size:10px;color:#b8bfda;line-height:1.5">Script yang di-generate otomatis detect Lemur/Desktop/Mobile + handle flow Next→Post + anti-komentar.</div>
+</div>
+
+<h3 style="margin-top:16px">🎬 Rekaman Manual (opsional)</h3>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button class="btn" id="btnRecDown">⬇ Download Recorder</button>
+<button class="btn w" id="btnRecCopy">📋 Copy Recorder</button>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const LICENSE_API_URL = 'https://script.google.com/macros/s/AKfycbwXeMsnoERTdgtVbU_tKjy7fZm5ljPWQBVDvJUUqUJkY-eoeGpssS2lVxnP4ss43D1ZdQ/exec';
+const LICENSE_CACHE_KEY = 'jhon_v2_license_cache';
+const LICENSE_DEVICE_KEY = 'jhon_v2_device_id';
+const LICENSE_CACHE_MS = 24 * 60 * 60 * 1000;
+const AUTOSAVE_KEY = 'jhon_v2_autosave';
+const USER_TPL_KEY = 'jhon_v2_user_templates';
+
+/* ============================================================
+   ENV DETECTION
+   ============================================================ */
+const UA = navigator.userAgent;
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(UA);
+const IS_LEMUR = /Lemur|Android/i.test(UA) && window.innerWidth > 700;
+const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const IS_DESKTOP = !IS_MOBILE && !IS_TOUCH;
+const ENV_LABEL = IS_LEMUR ? 'LEMUR' : IS_MOBILE ? 'MOBILE' : 'DESKTOP';
+
+document.getElementById('envPill').textContent = '🌐 ' + ENV_LABEL + ' detected';
+document.getElementById('envBadge').textContent = ENV_LABEL;
+console.log('[JHON] Env:', { mobile: IS_MOBILE, lemur: IS_LEMUR, touch: IS_TOUCH, desktop: IS_DESKTOP });
+
+/* ============================================================
+   USER TEMPLATES (localStorage)
+   ============================================================ */
+let USER_TEMPLATES = {};
+let activeTemplate = null; // nama template user
+
+function loadUserTemplates(){
+  try {
+    const raw = localStorage.getItem(USER_TPL_KEY);
+    if (raw) {
+      const obj = JSON.parse(raw);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) return obj;
+    }
+  } catch(e) {}
+  return {};
+}
+function saveUserTemplates(){
+  try { localStorage.setItem(USER_TPL_KEY, JSON.stringify(USER_TEMPLATES)); } catch(e) {}
+}
+USER_TEMPLATES = loadUserTemplates();
+
+/* ============================================================
+   LICENSE SYSTEM
+   ============================================================ */
+function getOrCreateDeviceId(){
+  let id = localStorage.getItem(LICENSE_DEVICE_KEY);
+  if (!id) {
+    id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(LICENSE_DEVICE_KEY, id);
+  }
+  return id;
+}
+function readLicenseCache(){
+  try {
+    const raw = localStorage.getItem(LICENSE_CACHE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj.kode || !obj.ts) return null;
+    if (Date.now() - obj.ts > LICENSE_CACHE_MS) return null;
+    return obj;
+  } catch(e) { return null; }
+}
+function writeLicenseCache(kode, nama){
+  try { localStorage.setItem(LICENSE_CACHE_KEY, JSON.stringify({ kode, nama: nama || '', ts: Date.now() })); } catch(e) {}
+}
+function clearLicenseCache(){ try { localStorage.removeItem(LICENSE_CACHE_KEY); } catch(e) {} }
+function setLicenseMsg(text, isErr){
+  const el = document.getElementById('licenseMsg');
+  el.textContent = text;
+  el.style.color = isErr ? '#ff5580' : '#5dffc0';
+}
+function showApp(nama){
+  document.getElementById('licenseGate').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+  const badge = document.getElementById('activeBadge');
+  badge.style.display = 'block';
+  if (nama) badge.textContent = '✅ LISENSI AKTIF • ' + nama;
+  setTimeout(() => {
+    const cb = document.getElementById('autoRemoveLink');
+    if (cb) { cb.checked = false; cb.disabled = true; }
+    loadAuto();
+  }, 200);
+  console.log('[JHON] App unlocked');
+}
+async function verifyLicense(kode, opts){
+  opts = opts || {};
+  const silent = !!opts.silent;
+  const deviceId = getOrCreateDeviceId();
+  const btn = document.getElementById('licenseSubmitBtn');
+  if (!silent) {
+    btn.disabled = true;
+    btn.textContent = 'Memeriksa...';
+    setLicenseMsg('Menghubungi server lisensi...', false);
+  }
+  try {
+    const url = LICENSE_API_URL + '?kode=' + encodeURIComponent(kode) + '&device_id=' + encodeURIComponent(deviceId);
+    const resp = await fetch(url, { cache: 'no-store' });
+    const json = await resp.json();
+    if (json.valid) {
+      writeLicenseCache(kode, json.nama || '');
+      if (!silent) setLicenseMsg('✅ ' + (json.message || 'Kode valid') + ' — Membuka tools...', false);
+      showApp(json.nama || '');
+      return true;
+    } else {
+      clearLicenseCache();
+      if (!silent) setLicenseMsg('❌ ' + (json.message || 'Kode tidak valid'), true);
+      return false;
+    }
+  } catch (err) {
+    if (!silent) setLicenseMsg('⚠️ Gagal konek server: ' + err.message, true);
+    return false;
+  } finally {
+    if (!silent) {
+      btn.disabled = false;
+      btn.textContent = '▶ Aktifkan Lisensi';
+    }
+  }
+}
+(async function(){
+  const cached = readLicenseCache();
+  if (cached && cached.kode) {
+    console.log('[JHON] Cache found, silent verify...');
+    const ok = await verifyLicense(cached.kode, { silent: true });
+    if (!ok) {
+      document.getElementById('licenseGate').style.display = 'flex';
+      document.getElementById('appContent').style.display = 'none';
+    }
+  }
+})();
+document.getElementById('licenseSubmitBtn').addEventListener('click', async ()=>{
+  const kode = document.getElementById('licenseInput').value.trim().toUpperCase();
+  if (!kode) { setLicenseMsg('Masukkan kode dulu bos!', true); return; }
+  await verifyLicense(kode);
+});
+document.getElementById('licenseInput').addEventListener('keypress', (e)=>{
+  if (e.key === 'Enter') document.getElementById('licenseSubmitBtn').click();
+});
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = { json: [], rows: [], headers: [], target: [] };
+let wbData = null;
+
+function logXls(m){
+  const el = document.getElementById('xlsLog');
+  el.textContent += "\n" + m;
+}
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('tab-tpl').style.display = tab === 'tpl' ? 'block' : 'none';
+  document.getElementById('tab-json').style.display = tab === 'json' ? 'block' : 'none';
+}
+
+/* ============================================================
+   RENDER USER TEMPLATES
+   ============================================================ */
+function renderTemplates(){
+  const list = document.getElementById('tplList');
+  list.innerHTML = '';
+  const keys = Object.keys(USER_TEMPLATES);
+  if (!keys.length) {
+    list.innerHTML = '<div class="hint" style="color:#888;text-align:center;padding:14px;background:#0a0a0a;border-radius:8px">📭 Belum ada template tersimpan.<br><br>Rekam di FB → paste JSON di tab <b>Custom JSON</b> → Save di bawah.</div>';
+    return;
+  }
+  keys.forEach(name => {
+    const steps = USER_TEMPLATES[name];
+    const div = document.createElement('div');
+    div.className = 'tpl-item' + (name === activeTemplate ? ' active' : '');
+    const typesSummary = (steps || []).map(s => s.type).join(' → ');
+    div.innerHTML = '<div class="tpl-title">' + escapeHtml(name) + '</div><div class="tpl-desc">' + (steps.length) + ' langkah • ' + escapeHtml(typesSummary).slice(0, 60) + '</div>';
+    div.onclick = (e) => {
+      if (e.target.classList.contains('tpl-delete')) return;
+      activeTemplate = name;
+      renderTemplates();
+      loadTemplate(name);
+    };
+    const del = document.createElement('button');
+    del.className = 'tpl-delete';
+    del.textContent = '🗑️';
+    del.title = 'Hapus template';
+    del.onclick = (e) => { e.stopPropagation(); deleteUserTemplate(name); };
+    div.appendChild(del);
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function saveAsTemplate(){
+  const nameEl = document.getElementById('newTplName');
+  const name = (nameEl.value || '').trim();
+  if (!name) { alert('Isi nama template dulu bos!'); nameEl.focus(); return; }
+  if (!state.json.length) { alert('Ga ada step untuk di-save. Rekam dulu atau paste JSON di tab Custom JSON.'); return; }
+  if (USER_TEMPLATES[name]) {
+    if (!confirm('Template "' + name + '" sudah ada. Timpa (overwrite)?')) return;
+  }
+  USER_TEMPLATES[name] = JSON.parse(JSON.stringify(state.json));
+  saveUserTemplates();
+  activeTemplate = name;
+  nameEl.value = '';
+  renderTemplates();
+  saveAuto(false);
+  alert('✅ Template "' + name + '" tersimpan!');
+}
+
+function deleteUserTemplate(name){
+  if (!confirm('Hapus template "' + name + '"?\n\n(Tindakan ini tidak bisa dibatalkan)')) return;
+  delete USER_TEMPLATES[name];
+  saveUserTemplates();
+  if (activeTemplate === name) activeTemplate = null;
+  renderTemplates();
+  saveAuto(false);
+  console.log('[JHON] Template deleted:', name);
+}
+
+function loadTemplate(name){
+  const steps = USER_TEMPLATES[name];
+  if (!steps) return;
+  state.json = JSON.parse(JSON.stringify(steps));
+  document.getElementById('jsonIn').value = JSON.stringify(state.json, null, 2);
+  renderJsonPreview();
+  renderActiveSteps();
+  saveAuto(false);
+}
+
+/* ============================================================
+   JSON PREVIEW
+   ============================================================ */
+function renderJsonPreview(){
+  const el = document.getElementById('jsonPreview');
+  if (!state.json.length) { el.innerHTML = '<div class="hint" style="color:#666">Belum ada step</div>'; return; }
+  let html = '<div class="hint">' + state.json.length + ' langkah:</div>';
+  state.json.forEach((s, i) => {
+    html += '<div class="step"><b>' + (i+1) + '. ' + escapeHtml(s.type) + '</b> <span style="color:var(--mut)">' + escapeHtml((s.text ? 'TEXT:' + s.text : (s.selector||'')).slice(0,60)) + '</span></div>';
+  });
+  el.innerHTML = html;
+}
+
+/* ============================================================
+   ACTIVE STEPS
+   ============================================================ */
+function renderActiveSteps(){
+  const el = document.getElementById('activeSteps');
+  if (!state.json.length) { el.innerHTML = ''; return; }
+  let html = '<div style="font-size:10px;color:var(--dim);margin-bottom:6px">✅ Steps aktif: ' + state.json.length + ' langkah</div>';
+  state.json.forEach((s, i) => {
+    let icon = s.type === 'CLICK' ? '👆' : s.type === 'TYPE' ? '⌨️' : '⚙️';
+    let label = s.text ? 'TEXT:' + s.text : (s.selector || '');
+    if (s.selector === 'POST_BUTTON_REAL') label = 'Submit (Post/Next)';
+    html += '<div style="font-size:10px;padding:4px 6px;background:var(--panel2);border-radius:6px;margin-bottom:3px;border-left:3px solid ' + (s.type === 'TYPE' ? '#10b981' : '#0ea5e9') + '">' + icon + ' <b>' + (i+1) + '.</b> ' + escapeHtml(label.slice(0, 45)) + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+/* ============================================================
+   JSON INPUT
+   ============================================================ */
+document.getElementById('jsonIn').addEventListener('input', () => {
+  try {
+    let raw = (document.getElementById('jsonIn').value || '').trim();
+    raw = raw.replace(/^\uFEFF/, '').replace(/;\s*$/, '').replace(/,\s*([\]\}])/g, '$1');
+    if (!raw) raw = '[]';
+    const j = JSON.parse(raw);
+    state.json = Array.isArray(j) ? j : [];
+    renderJsonPreview();
+    renderActiveSteps();
+  } catch(e) {
+    document.getElementById('jsonPreview').innerHTML = '<small style="color:#f87171">JSON error: ' + e.message + '</small>';
+  }
+  saveAuto(false);
+});
+function loadContoh(){
+  const contoh = [
+    { type: 'CLICK', selector: '[aria-label="Buat postingan"]', value: '', url: '' },
+    { type: 'TYPE', selector: 'div[contenteditable=true]', value: 'POST_CONTENT', url: '', autoRemoveLink: false, previewWait: 3 },
+    { type: 'CLICK', selector: 'POST_BUTTON_REAL', value: '', url: '' }
+  ];
+  document.getElementById('jsonIn').value = JSON.stringify(contoh, null, 2);
+  state.json = contoh;
+  renderJsonPreview();
+  renderActiveSteps();
+  saveAuto(false);
+}
+function formatJson(){
+  try {
+    const j = JSON.parse(document.getElementById('jsonIn').value);
+    document.getElementById('jsonIn').value = JSON.stringify(j, null, 2);
+  } catch(e) { alert('JSON error: ' + e.message); }
+}
+function clearJson(){
+  if (!confirm('Clear JSON? (Template tersimpan TIDAK terhapus)')) return;
+  document.getElementById('jsonIn').value = '';
+  state.json = [];
+  renderJsonPreview();
+  renderActiveSteps();
+  saveAuto(false);
+}
+
+/* ============================================================
+   XLSX
+   ============================================================ */
+document.getElementById('xlsFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('xlsLog').textContent = '';
+  logXls('Baca: ' + file.name);
+  try {
+    let wb;
+    if (/\.csv$/i.test(file.name)) wb = XLSX.read(await file.text(), { type: 'string' });
+    else wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    wbData = wb;
+    const sel = document.getElementById('sheetSel');
+    sel.innerHTML = '';
+    wb.SheetNames.forEach(name => {
+      const o = document.createElement('option'); o.value = name; o.textContent = name; sel.appendChild(o);
+    });
+    sel.style.display = wb.SheetNames.length > 1 ? 'block' : 'none';
+    loadSheet(wb.SheetNames[0]);
+  } catch(err) { logXls('ERROR: ' + err.message); }
+});
+document.getElementById('sheetSel').addEventListener('change', (e) => {
+  if (wbData) { document.getElementById('xlsLog').textContent = ''; loadSheet(e.target.value); }
+});
+document.getElementById('colSep').addEventListener('change', () => { renderXlsPreview(); saveAuto(false); });
+document.getElementById('colCheckAll').addEventListener('change', (e) => {
+  document.querySelectorAll('#colCheckWrap input[type=checkbox]').forEach(c => { c.checked = e.target.checked; });
+  renderXlsPreview();
+});
+document.getElementById('colCheckWrap').addEventListener('change', (e) => {
+  if (e.target && e.target.type === 'checkbox') {
+    const boxes = Array.from(document.querySelectorAll('#colCheckWrap input[type=checkbox]'));
+    document.getElementById('colCheckAll').checked = boxes.length > 0 && boxes.every(c => c.checked);
+  }
+  renderXlsPreview();
+});
+['delay','typeSpeed','previewWait','autoRemoveLink'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => saveAuto(false));
+  el.addEventListener('change', () => saveAuto(false));
+});
+
+function loadSheet(name){
+  const ws = wbData.Sheets[name];
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+  if (!json.length) { logXls("Sheet kosong"); return; }
+  const headers = json[0].map(h => String(h||'').trim() || 'COL');
+  const rows = json.slice(1).filter(r => r.some(c => String(c).trim()));
+  state.headers = headers;
+  state.rows = rows;
+  const colCheckWrap = document.getElementById('colCheckWrap');
+  colCheckWrap.innerHTML = '';
+  headers.forEach((h, i) => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:11px;cursor:pointer';
+    row.innerHTML = '<input type="checkbox" value="' + i + '"> <span>' + escapeHtml(h) + ' (col ' + (i+1) + ')</span>';
+    colCheckWrap.appendChild(row);
+  });
+  let autoIdx = headers.findIndex(h => /target|isi|konten|caption|text|pesan|title|post/i.test(h));
+  if (autoIdx === -1) autoIdx = 0;
+  const firstChk = colCheckWrap.querySelector('input[value="' + autoIdx + '"]');
+  if (firstChk) firstChk.checked = true;
+  document.getElementById('colCheckAll').checked = false;
+  document.getElementById('colSelWrap').style.display = 'block';
+  renderXlsPreview();
+  logXls('Sheet ' + name + ': ' + rows.length + ' baris, ' + headers.length + ' kolom');
+}
+
+function renderXlsPreview(){
+  const checks = Array.from(document.querySelectorAll('#colCheckWrap input[type=checkbox]:checked'))
+    .map(c => parseInt(c.value, 10)).sort((a,b) => a-b);
+  const sepRaw = document.getElementById('colSep').value;
+  const sep = sepRaw === '\\n' ? '\n' : sepRaw;
+  const colIdxs = checks.length ? checks : [0];
+
+  state.target = state.rows
+    .map(r => colIdxs.map(ci => String(r[ci]||'').trim()).filter(Boolean).join(sep))
+    .filter(Boolean);
+
+  const colNames = colIdxs.map(ci => state.headers[ci]).join(' + ');
+  let html = '<div class="hint">' + state.target.length + ' target (kolom: ' + escapeHtml(colNames) + '):</div>';
+  state.target.slice(0,3).forEach((p,i) => {
+    html += '<div class="step">' + (i+1) + '. ' + escapeHtml(p.slice(0,140)) + (p.length>140?'...':'') + '</div>';
+  });
+  if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
+  document.getElementById('xlsPreview').innerHTML = html;
+  saveAuto(false);
+}
+function renderXlsPreviewFromState(){
+  if (!state.target || !state.target.length) {
+    document.getElementById('xlsPreview').innerHTML = '';
+    return;
+  }
+  let html = '<div class="hint">' + state.target.length + ' target (dari autosave — re-upload Excel untuk edit kolom):</div>';
+  state.target.slice(0,3).forEach((p,i) => {
+    html += '<div class="step">' + (i+1) + '. ' + escapeHtml(String(p).slice(0,140)) + (String(p).length>140?'...':'') + '</div>';
+  });
+  if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
+  document.getElementById('xlsPreview').innerHTML = html;
+}
+
+/* ============================================================
+   AUTOSAVE
+   ============================================================ */
+let _saveTimer = null;
+let _lastHash = '';
+function computeHash(){
+  try {
+    const p = [
+      JSON.stringify(state.json || []),
+      JSON.stringify(state.target || []),
+      document.getElementById('delay').value,
+      document.getElementById('typeSpeed').value,
+      document.getElementById('previewWait').value,
+      document.getElementById('autoRemoveLink').checked ? '1' : '0',
+      document.getElementById('colSep').value,
+      String(activeTemplate || '')
+    ].join('||');
+    let h = 0;
+    for (let i = 0; i < p.length; i++) { h = ((h << 5) - h + p.charCodeAt(i)) | 0; }
+    return String(h);
+  } catch(e) { return ''; }
+}
+function saveAuto(force){
+  try {
+    const hash = computeHash();
+    if (!force && hash === _lastHash) return;
+    _lastHash = hash;
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+      template: activeTemplate,
+      json: state.json,
+      target: state.target,
+      delay: document.getElementById('delay').value,
+      typeSpeed: document.getElementById('typeSpeed').value,
+      previewWait: document.getElementById('previewWait').value,
+      autoRemoveLink: document.getElementById('autoRemoveLink').checked,
+      colSep: document.getElementById('colSep').value,
+      ts: Date.now()
+    }));
+    const sEl = document.getElementById('autosaveStatus');
+    if (sEl) {
+      sEl.textContent = '✓ Tersimpan ' + new Date().toLocaleTimeString();
+      sEl.style.color = '#10B981';
+    }
+    const hEl = document.getElementById('saveStatus');
+    if (hEl) {
+      hEl.style.display = 'inline-block';
+      hEl.textContent = '✓ Saved ' + new Date().toLocaleTimeString().slice(0,5);
+    }
+  } catch(e) {
+    console.warn('[JHON] Autosave error:', e);
+  }
+}
+function loadAuto(){
+  try {
+    // Reload user templates (kalau ada tab lain yang update)
+    USER_TEMPLATES = loadUserTemplates();
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) { renderTemplates(); return; }
+    const d = JSON.parse(raw);
+    if (d.template && USER_TEMPLATES[d.template]) {
+      activeTemplate = d.template;
+    } else {
+      activeTemplate = null;
+    }
+    if (Array.isArray(d.json) && d.json.length) {
+      state.json = d.json;
+      document.getElementById('jsonIn').value = JSON.stringify(state.json, null, 2);
+      renderJsonPreview();
+      renderActiveSteps();
+    } else if (activeTemplate && USER_TEMPLATES[activeTemplate]) {
+      loadTemplate(activeTemplate);
+    }
+    if (typeof d.delay !== 'undefined') document.getElementById('delay').value = d.delay;
+    if (typeof d.typeSpeed !== 'undefined') document.getElementById('typeSpeed').value = d.typeSpeed;
+    if (typeof d.previewWait !== 'undefined') document.getElementById('previewWait').value = d.previewWait;
+    const cb = document.getElementById('autoRemoveLink');
+    if (cb) { cb.checked = false; cb.disabled = true; }
+    if (typeof d.colSep !== 'undefined') document.getElementById('colSep').value = d.colSep;
+    if (Array.isArray(d.target) && d.target.length) {
+      state.target = d.target;
+      renderXlsPreviewFromState();
+    }
+    renderTemplates();
+    const sEl = document.getElementById('autosaveStatus');
+    if (sEl) {
+      sEl.textContent = '↺ Dipulihkan (' + new Date(d.ts).toLocaleTimeString() + ')';
+      sEl.style.color = '#a78bfa';
+    }
+  } catch(e) {
+    console.warn('[JHON] LoadAuto error:', e);
+    renderTemplates();
+  }
+}
+function clearAutosave(){
+  if (!confirm('Hapus data autosave?\n\n(JSON, setting, target, template aktif. Template tersimpan TIDAK terhapus. Lisensi TIDAK terhapus.)')) return;
+  try {
+    localStorage.removeItem(AUTOSAVE_KEY);
+    document.getElementById('delay').value = 'auto';
+    document.getElementById('typeSpeed').value = '0';
+    document.getElementById('previewWait').value = '3';
+    const cb = document.getElementById('autoRemoveLink');
+    if (cb) { cb.checked = false; cb.disabled = true; }
+    document.getElementById('colSep').value = ' ';
+    state.target = [];
+    state.json = [];
+    document.getElementById('jsonIn').value = '';
+    document.getElementById('xlsPreview').innerHTML = '';
+    renderJsonPreview();
+    renderActiveSteps();
+    activeTemplate = null;
+    renderTemplates();
+    _lastHash = '';
+    const sEl = document.getElementById('autosaveStatus');
+    if (sEl) {
+      sEl.textContent = '🗑️ Data dihapus — template & lisensi tetap aman';
+      sEl.style.color = '#fca5a5';
+    }
+  } catch(e) {}
+}
+window.addEventListener('beforeunload', () => { try { saveAuto(true); } catch(e){} });
+
+/* ============================================================
+   RECORDER SOURCE (JHON RECORDER v3.6)
+   ============================================================ */
+const RECORDER_SOURCE = "// ==UserScript==\n// @name         JHON RECORDER v3.6\n// @namespace    jhon-recorder\n// @version      3.6\n// @description  Rekam klik & ketik FB - fallback composer tanpa aria (teks)\n// @author       JHON\n// @match        *://*.facebook.com/*\n// @grant        none\n// @run-at       document-idle\n// ==/UserScript==\n\n(function(){\n  'use strict';\n\n  let REC = [];\n  let IS_REC = false;\n  let HAS_SESSION = false;\n  let UI_CLOSED = false;\n  let DEBUG_LOGS = [];\n  let _scanInterval = null;\n  let _lastSubmitTs = 0;\n\n  const BLACKLIST = /^(postingan|galeri|konten|photos|foto|video|reels|story|tentang|about|friends|teman|following|mengikuti|followers|pengikut|likes|suka|komentar|comment|ulasan|review|check.?in|kunjungan|perkenalan|intro|event|acara|services|layanan|shop|toko|groups|grup|halaman|pages|menu|lihat semua|see all|see more|lihat selengkapnya|lihat info|postingan terbaru|recent posts|sematkan|pinned|boost post|boost|insight|see insights|dasbor profesional|perencana|monetisasi|professional dashboard|planner|monetization|notifications|notifikasi|messages|pesan|search|pencarian|home|beranda|watch|marketplace|gaming|menu utama|pusat iklan|buat iklan|create ad|ad center|admin|pengaturan|settings|keluar|logout|edit profil|edit profile|lihat sebagai|view as|konten profil halaman|page profile content|profile content|lihat konten)$/i;\n\n  const SUBMIT_RE = /^(berikutnya|next|lanjut|selanjutnya|post|posting|bagikan|share|kirim|publish)$/i;\n  const COMPOSER_EXACT = /^(buat postingan|create a post|create post|write something)$/i;\n  const COMPOSER_CONTAINS = /what.*on your mind|apa yang (anda|kamu) pikirkan|buat postingan|pikirkan sekarang|mulai posting/i;\n  const COMPOSER_PREFIX = /^(apa yang (?:anda|kamu) pikirkan|what'?s on your mind|what on your mind|buat postingan|create a post|create post|write something)/i;\n  const CLICKABLE = '[role=\"button\"],button,a,[role=\"link\"],[role=\"menuitem\"],[role=\"tab\"]';\n\n  function esc(s){\n    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\n  }\n\n  function copyToClipboard(text, successMsg){\n    if(navigator.clipboard && navigator.clipboard.writeText){\n      navigator.clipboard.writeText(text)\n        .then(() => { if(successMsg) alert(successMsg); })\n        .catch(err => {\n          console.warn('[JHON REC] clipboard API gagal:', err);\n          fallbackCopy(text, successMsg);\n        });\n    } else {\n      fallbackCopy(text, successMsg);\n    }\n  }\n\n  function fallbackCopy(text, successMsg){\n    try {\n      const ta = document.createElement('textarea');\n      ta.value = text;\n      ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;opacity:0.01;padding:0;border:0;';\n      ta.setAttribute('readonly', '');\n      document.body.appendChild(ta);\n      ta.focus();\n      ta.select();\n      ta.setSelectionRange(0, text.length);\n      const ok = document.execCommand('copy');\n      document.body.removeChild(ta);\n      if(ok){\n        if(successMsg) alert(successMsg);\n        return true;\n      }\n      throw new Error('execCommand copy false');\n    } catch(e){\n      console.warn('[JHON REC] fallback copy gagal:', e);\n      manualCopyPrompt(text);\n      return false;\n    }\n  }\n\n  function manualCopyPrompt(text){\n    try {\n      const old = document.getElementById('jhon-copymodal');\n      if(old) old.remove();\n\n      const modal = document.createElement('div');\n      modal.id = 'jhon-copymodal';\n      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;';\n\n      const box = document.createElement('div');\n      box.style.cssText = 'max-width:600px;width:100%;background:#1a1a1a;border:2px solid #0ea5e9;border-radius:12px;padding:15px;color:#fff;font-family:monospace;';\n\n      const title = document.createElement('div');\n      title.style.cssText = 'font-size:13px;font-weight:bold;margin-bottom:10px;';\n      title.textContent = '📋 Copy Manual (Ctrl+A → Ctrl+C)';\n\n      const ta = document.createElement('textarea');\n      ta.value = text;\n      ta.style.cssText = 'width:100%;height:300px;background:#000;color:#0ea5e9;border:1px solid #333;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;';\n      ta.readOnly = true;\n\n      const btnRow = document.createElement('div');\n      btnRow.style.cssText = 'display:flex;gap:8px;margin-top:10px;';\n\n      const selectBtn = document.createElement('button');\n      selectBtn.textContent = '📝 Select All';\n      selectBtn.style.cssText = 'flex:1;padding:10px;background:#0ea5e9;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;';\n      selectBtn.onclick = () => { ta.focus(); ta.select(); };\n\n      const copyBtn = document.createElement('button');\n      copyBtn.textContent = '📋 Copy';\n      copyBtn.style.cssText = 'flex:1;padding:10px;background:#10b981;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;';\n      copyBtn.onclick = () => {\n        ta.focus();\n        ta.select();\n        try { document.execCommand('copy'); } catch(e){}\n        alert('Kalau berhasil, text udah ke-copy. Klik OK terus paste di chat.');\n        modal.remove();\n      };\n\n      const closeBtn = document.createElement('button');\n      closeBtn.textContent = '❌ Close';\n      closeBtn.style.cssText = 'padding:10px 15px;background:#7f1d1d;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;';\n      closeBtn.onclick = () => modal.remove();\n\n      btnRow.appendChild(selectBtn);\n      btnRow.appendChild(copyBtn);\n      btnRow.appendChild(closeBtn);\n      box.appendChild(title);\n      box.appendChild(ta);\n      box.appendChild(btnRow);\n      modal.appendChild(box);\n      document.body.appendChild(modal);\n\n      setTimeout(() => { ta.focus(); ta.select(); }, 100);\n    } catch(e){\n      console.error('[JHON REC] modal copy gagal:', e);\n      window.prompt('Copy manual (Ctrl+A → Ctrl+C):', text);\n    }\n  }\n\n  function dbg(msg, type){\n    const t = new Date().toLocaleTimeString().slice(0,8);\n    const icon = type === 'match' ? '✅' : type === 'skip' ? '⏭️' : type === 'warn' ? '⚠️' : type === 'click' ? '👆' : type === 'type' ? '⌨️' : 'ℹ️';\n    const line = '[' + t + '] ' + icon + ' ' + msg;\n    DEBUG_LOGS.push(line);\n    if(DEBUG_LOGS.length > 100) DEBUG_LOGS.shift();\n    renderDebugLog();\n    console.log('[JHON REC]', line);\n  }\n\n  function renderDebugLog(){\n    const el = document.getElementById('rec-debuglog');\n    if(el){\n      el.innerHTML = DEBUG_LOGS.slice(-40).map(l => '<div>' + esc(l) + '<\\/div>').join('');\n      el.scrollTop = el.scrollHeight;\n    }\n  }\n\n  function renderSteps(){\n    const el = document.getElementById('rec-steps');\n    if(!el) return;\n    if(!REC.length){ el.innerHTML = '<div style=\"color:#555\">— belum ada step —<\\/div>'; return; }\n    el.innerHTML = REC.map((s, i) => {\n      let label = s.type;\n      if(s.selector === 'POST_BUTTON_REAL') label += ' → 🎯 POST_BUTTON_REAL';\n      else if(s.type === 'TYPE') label += ' → ⌨️ POST_CONTENT';\n      else label += ' → ' + (s.text ? 'TEXT:' + s.text : (s.selector || '')).slice(0, 40);\n      const color = s.type === 'TYPE' ? '#10b981' : s.selector === 'POST_BUTTON_REAL' ? '#f59e0b' : '#0ea5e9';\n      return '<div style=\"color:' + color + '\"><b>' + (i+1) + '.<\\/b> ' + esc(label) + '<\\/div>';\n    }).join('');\n  }\n\n  function updateCount(){\n    const el = document.getElementById('rec-count');\n    if(el) el.textContent = REC.length + ' step';\n  }\n\n  function addTypeStep(reason, inDialog){\n    const last = REC[REC.length - 1];\n    if(last && last.type === 'TYPE'){\n      dbg('TYPE sudah ada, skip', 'skip');\n      return false;\n    }\n    const selector = inDialog\n      ? 'div[role=\"dialog\"] div[contenteditable=\"true\"][role=\"textbox\"]'\n      : 'div[contenteditable=\"true\"][role=\"textbox\"]';\n    REC.push({\n      type: 'TYPE',\n      selector: selector,\n      value: 'POST_CONTENT',\n      url: '',\n      autoRemoveLink: false,\n      previewWait: 3\n    });\n    dbg('MATCH TYPE → POST_CONTENT (' + reason + ')', 'match');\n    renderSteps(); updateCount();\n    return true;\n  }\n\n  function setRecUI(){\n    const d = document.getElementById('jhon-rec');\n    if(!d) return;\n    const st = d.querySelector('#rec-status');\n    const btn = d.querySelector('#rec-start');\n    if(st){ st.textContent = IS_REC ? '🔴 MEREKAM...' : (HAS_SESSION ? '⏸ Pause' : 'Siap'); st.style.color = IS_REC ? '#ef4444' : '#0ea5e9'; }\n    if(btn){\n      btn.textContent = IS_REC ? '⏸ PAUSE' : (HAS_SESSION ? '▶ LANJUT' : '▶ MULAI REKAM');\n      btn.style.background = IS_REC ? '#7f1d1d' : '#f59e0b';\n      btn.style.color = IS_REC ? '#fff' : '#000';\n    }\n  }\n\n  function makeUI(){\n    if(UI_CLOSED) return;\n    if(document.getElementById('jhon-rec')) return;\n    if(!document.body) return;\n\n    const d = document.createElement('div');\n    d.id = 'jhon-rec';\n    d.style.cssText = 'position:fixed;left:12px;top:80px;z-index:2147483646;background:#141414;border:2px solid #f59e0b;border-radius:12px;width:380px;max-width:calc(100vw - 24px);color:#fff;font-family:monospace;font-size:11px;box-shadow:0 4px 20px rgba(0,0,0,.6);';\n\n    d.innerHTML = `\n      <div id=\"rec-header\" style=\"padding:8px 10px;background:#1a1a1a;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;cursor:grab;user-select:none;touch-action:none\">\n        <b style=\"font-size:11px\">🔴 JHON REC v3.6<\/b>\n        <span id=\"rec-count\" style=\"font-size:10px;color:#f59e0b\">0 step<\/span>\n      <\/div>\n      <div style=\"padding:10px\">\n        <div style=\"font-size:10px;color:#aaa;margin-bottom:6px\">Status: <b id=\"rec-status\" style=\"color:#0ea5e9\">Siap<\/b><\/div>\n        <div style=\"font-size:9px;color:#888;margin-top:6px\">📋 STEPS:<\/div>\n        <div id=\"rec-steps\" style=\"font-size:9px;color:#7dd3fc;max-height:90px;overflow:auto;background:#0a0a0a;padding:6px;border-radius:6px;font-family:monospace;margin-top:3px\">— belum ada step —<\/div>\n        <div style=\"font-size:9px;color:#888;margin-top:6px\">🐛 DEBUG LOG:<\/div>\n        <div id=\"rec-debuglog\" style=\"font-size:9px;color:#888;max-height:180px;overflow:auto;background:#000;padding:6px;border-radius:6px;font-family:monospace;line-height:1.4;margin-top:3px\">— log —<\/div>\n        <div style=\"display:flex;gap:4px;margin-top:8px\">\n          <button id=\"rec-start\" style=\"flex:1;padding:8px;background:#f59e0b;color:#000;border:0;border-radius:6px;font-weight:800;cursor:pointer;font-size:11px\">▶ MULAI REKAM<\/button>\n          <button id=\"rec-stop\" style=\"flex:1;padding:8px;background:#0ea5e9;color:#fff;border:0;border-radius:6px;font-weight:800;cursor:pointer;font-size:11px\">⏹ STOP & COPY<\/button>\n        <\/div>\n        <div style=\"display:flex;gap:4px;margin-top:4px\">\n          <button id=\"rec-clear\" style=\"flex:1;padding:5px;background:#222;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer\">🗑️ Clear<\/button>\n          <button id=\"rec-copy\" style=\"flex:1;padding:5px;background:#0ea5e9;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer\">📋 Copy JSON<\/button>\n          <button id=\"rec-copylog\" style=\"flex:1;padding:5px;background:#7c3aed;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer\">📄 Copy Debug<\/button>\n          <button id=\"rec-close\" style=\"padding:5px 8px;background:#222;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer\">X<\/button>\n        <\/div>\n      <\/div>\n    `;\n\n    document.body.appendChild(d);\n\n    (function(){\n      const head = d.querySelector('#rec-header');\n      let dragging = false, sx = 0, sy = 0, sl = 0, st = 0;\n      head.addEventListener('pointerdown', function(e){\n        if(e.target.tagName === 'BUTTON') return;\n        dragging = true; sx = e.clientX; sy = e.clientY;\n        const r = d.getBoundingClientRect(); sl = r.left; st = r.top;\n        try { head.setPointerCapture(e.pointerId); } catch(_){}\n        e.preventDefault();\n      });\n      head.addEventListener('pointermove', function(e){\n        if(!dragging) return;\n        d.style.left = (sl + e.clientX - sx) + 'px';\n        d.style.top = (st + e.clientY - sy) + 'px';\n        d.style.right = 'auto'; d.style.bottom = 'auto';\n      });\n      function endDrag(e){\n        if(!dragging) return;\n        dragging = false;\n        try { head.releasePointerCapture(e.pointerId); } catch(_){}\n      }\n      head.addEventListener('pointerup', endDrag);\n      head.addEventListener('pointercancel', endDrag);\n    })();\n\n    d.querySelector('#rec-close').onclick = () => {\n      UI_CLOSED = true;\n      IS_REC = false;\n      if(_scanInterval){ clearInterval(_scanInterval); _scanInterval = null; }\n      d.remove();\n    };\n\n    d.querySelector('#rec-clear').onclick = () => {\n      REC = []; DEBUG_LOGS = [];\n      HAS_SESSION = false;\n      IS_REC = false;\n      if(_scanInterval){ clearInterval(_scanInterval); _scanInterval = null; }\n      renderSteps(); renderDebugLog(); updateCount(); setRecUI();\n      dbg('Cleared');\n    };\n\n    d.querySelector('#rec-start').onclick = () => {\n      IS_REC = !IS_REC;\n      if(IS_REC){\n        if(!HAS_SESSION){\n          REC = []; DEBUG_LOGS = [];\n          HAS_SESSION = true;\n          renderSteps(); updateCount();\n          dbg('🔴 Mulai rekam');\n          dbg('Klik composer, ketik text, klik Berikutnya/Kirim');\n        } else {\n          dbg('▶ Lanjut rekam (' + REC.length + ' step tersimpan)');\n        }\n        startScan();\n      } else {\n        dbg('⏸ Pause');\n        if(_scanInterval){ clearInterval(_scanInterval); _scanInterval = null; }\n      }\n      setRecUI();\n    };\n\n    d.querySelector('#rec-stop').onclick = () => {\n      IS_REC = false;\n      HAS_SESSION = false;\n      if(_scanInterval){ clearInterval(_scanInterval); _scanInterval = null; }\n      setRecUI();\n      dbg('⏹ STOP. Total: ' + REC.length + ' step');\n      if(REC.length === 0){ alert('Belum ada yang ke-rekam!'); return; }\n      copyJSON();\n    };\n\n    d.querySelector('#rec-copy').onclick = () => {\n      if(REC.length === 0){ alert('Belum ada!'); return; }\n      copyJSON();\n    };\n\n    d.querySelector('#rec-copylog').onclick = () => {\n      const text = '=== DEBUG LOG ===\\n' + DEBUG_LOGS.join('\\n') + '\\n\\n=== RECORDED STEPS (' + REC.length + ') ===\\n' + JSON.stringify(REC, null, 2);\n      copyToClipboard(text, '✅ Debug log + JSON ter-copy!');\n    };\n\n    renderSteps(); renderDebugLog(); updateCount(); setRecUI();\n  }\n\n  function copyJSON(){\n    const json = JSON.stringify(REC, null, 2);\n    copyToClipboard(json, '✅ JSON (' + REC.length + ' step) ter-copy!');\n  }\n\n  function recordClick(e){\n    if(!IS_REC) return;\n    if(!e.target || !e.target.closest) return;\n    if(e.target.closest('#jhon-rec, [id^=\"jhon-\"]')) return;\n\n    const t = e.target.closest(CLICKABLE) || e.target;\n    const txt = (t.textContent || '').trim();\n    const txtL = txt.toLowerCase();\n    const tag = t.tagName;\n    const rect = t.getBoundingClientRect();\n    const size = Math.round(rect.width) + 'x' + Math.round(rect.height);\n    const selfAria = (t.getAttribute('aria-label') || '').trim();\n    const ariaL = selfAria.toLowerCase();\n\n    dbg('CLICK: tag=' + tag + ' size=' + size + ' | txt=\"' + txt.slice(0, 25) + '\" | aria=\"' + selfAria.slice(0, 30) + '\"', 'click');\n\n    const navRe = /konten profil halaman|page profile content|profile content|lihat konten/i;\n    if(navRe.test(txtL) || navRe.test(ariaL)){\n      dbg('SKIP navigasi \"konten profil\"', 'skip');\n      return;\n    }\n\n    if(SUBMIT_RE.test(txtL) || SUBMIT_RE.test(ariaL)){\n      const inComposer = !!t.closest('div[role=\"dialog\"], form') || REC.some(s => s.type === 'TYPE');\n      if(!inComposer){\n        dbg('SKIP submit (di luar composer): \"' + (txt || selfAria) + '\"', 'skip');\n        return;\n      }\n      const now = Date.now();\n      if(now - _lastSubmitTs < 800){\n        dbg('SKIP dup submit (double-fire)', 'skip');\n        return;\n      }\n      _lastSubmitTs = now;\n      REC.push({ type: 'CLICK', selector: 'POST_BUTTON_REAL', value: '', url: '' });\n      dbg('MATCH submit → POST_BUTTON_REAL ← \"' + (txt || selfAria) + '\"', 'match');\n      renderSteps(); updateCount();\n      return;\n    }\n\n    if(COMPOSER_EXACT.test(selfAria) || COMPOSER_EXACT.test(txtL) || COMPOSER_CONTAINS.test(txtL) || COMPOSER_CONTAINS.test(selfAria)){\n      let useAria = selfAria;\n\n      if(!useAria){\n        let target = t;\n        for(let i = 0; i < 10 && target; i++){\n          if(target.getAttribute && (target.getAttribute('role') === 'button' || target.getAttribute('tabindex') === '0')){\n            const parentAria = target.getAttribute('aria-label');\n            if(parentAria){ useAria = parentAria; break; }\n          }\n          target = target.parentElement;\n        }\n      }\n\n      if(useAria){\n        const m = useAria.match(COMPOSER_PREFIX);\n        const sel = m\n          ? '[aria-label^=\"' + m[1].replace(/\"/g, '\\\\\"') + '\"]'\n          : '[aria-label=\"' + useAria.replace(/\"/g, '\\\\\"') + '\"]';\n        REC.push({ type: 'CLICK', selector: sel, value: '', url: '' });\n        dbg('Rekam buka composer: ' + sel.slice(0, 60), 'match');\n        renderSteps(); updateCount();\n        return;\n      } else {\n        const pm = txt.match(COMPOSER_PREFIX);\n        const label = pm ? pm[1] : txt.slice(0, 40);\n        REC.push({ type: 'CLICK', selector: 'div,span', text: label, value: '', url: '' });\n        dbg('Rekam buka composer (teks): \"' + label + '\"', 'match');\n        renderSteps(); updateCount();\n        return;\n      }\n    }\n\n    if(BLACKLIST.test(txtL) || BLACKLIST.test(ariaL)){\n      dbg('SKIP (blacklist): \"' + (txt || selfAria || '?').slice(0, 30) + '\"', 'skip');\n      return;\n    }\n\n    if(tag === 'DIV' || tag === 'SPAN' || tag === 'BODY' || tag === 'HTML'){\n      if(!selfAria){\n        dbg('SKIP (generic tanpa aria)', 'skip');\n        return;\n      }\n    }\n\n    let sel = '';\n    if(selfAria){ sel = '[aria-label=\"' + selfAria.replace(/\"/g, '\\\\\"') + '\"]'; }\n    else {\n      sel = tag.toLowerCase();\n      if(t.id) sel += '#' + t.id;\n    }\n\n    if(sel === 'div' || sel === 'span' || sel === 'button' || sel === 'a' || sel.length < 5){\n      dbg('SKIP (selector generic): ' + sel, 'skip');\n      return;\n    }\n    if(txtL.length > 60){\n      dbg('SKIP (text >60)', 'skip');\n      return;\n    }\n\n    REC.push({ type: 'CLICK', selector: sel, value: '', url: '' });\n    dbg('Rekam CLICK: ' + sel.slice(0, 50), 'match');\n    renderSteps(); updateCount();\n  }\n\n  function tryRecordType(source, e){\n    if(!IS_REC) return;\n    const target = e.target;\n    if(!target || !target.closest || target.closest('#jhon-rec, [id^=\"jhon-\"]')) return;\n\n    const editableEl = target.closest('[contenteditable=\"true\"]');\n    const tag = target.tagName;\n    const isField = !!editableEl || tag === 'TEXTAREA' || tag === 'INPUT';\n    if(!isField) return;\n\n    const el = editableEl || target;\n    const role = (el.getAttribute('role') || '').toLowerCase();\n    const type = (el.getAttribute('type') || '').toLowerCase();\n    if(type === 'search' || role === 'searchbox' || role === 'combobox'){\n      dbg('SKIP TYPE (search/combobox)', 'skip');\n      return;\n    }\n\n    const inDialog = !!target.closest('div[role=\"dialog\"]');\n    dbg('[' + source + '] tag=' + tag + ' role=' + role + ' dialog=' + inDialog, inDialog ? 'type' : 'skip');\n\n    if(!inDialog){\n      dbg('SKIP TYPE (bukan composer dialog)', 'skip');\n      return;\n    }\n    addTypeStep(source, inDialog);\n  }\n\n  function handleInput(e){ tryRecordType('input', e); }\n  function handleBeforeInput(e){ tryRecordType('beforeinput', e); }\n  function handleKeydown(e){\n    if(!e.key || e.key.length > 1) return;\n    if(e.ctrlKey || e.metaKey || e.altKey) return;\n    tryRecordType('keydown:' + e.key, e);\n  }\n  function handlePaste(e){ tryRecordType('paste', e); }\n\n  function startScan(){\n    if(_scanInterval) clearInterval(_scanInterval);\n    _scanInterval = setInterval(() => {\n      if(!IS_REC) return;\n      const last = REC[REC.length - 1];\n      if(last && last.type === 'TYPE') return;\n\n      const dlg = document.querySelector('div[role=\"dialog\"]');\n      if(!dlg || dlg.offsetParent === null) return;\n\n      const editables = dlg.querySelectorAll('div[contenteditable=\"true\"][role=\"textbox\"], textarea');\n      for(const ed of editables){\n        if(ed.offsetParent === null) continue;\n        const txt = (ed.textContent || ed.value || '').trim();\n        if(txt.length > 5){\n          dbg('SCAN: composer dialog ada ' + txt.length + ' char', 'warn');\n          addTypeStep('scan', true);\n          return;\n        }\n      }\n    }, 1500);\n  }\n\n  window._jhonDebug = function(){\n    const text = '=== DEBUG LOG ===\\n' + DEBUG_LOGS.join('\\n') + '\\n\\n=== RECORDED STEPS (' + REC.length + ') ===\\n' + JSON.stringify(REC, null, 2);\n    console.log(text);\n    return text;\n  };\n  window._jhonRec = function(){ return REC; };\n  window._jhonLogs = function(){ return DEBUG_LOGS; };\n\n  document.addEventListener('click', recordClick, true);\n  document.addEventListener('input', handleInput, true);\n  document.addEventListener('beforeinput', handleBeforeInput, true);\n  document.addEventListener('keydown', handleKeydown, true);\n  document.addEventListener('paste', handlePaste, true);\n\n  function ensureUI(){\n    try { makeUI(); } catch(e){ console.error('[JHON REC] UI error:', e); }\n  }\n  ensureUI();\n  [300, 800, 1500, 3000, 5000].forEach(t => setTimeout(ensureUI, t));\n  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureUI);\n  window.addEventListener('load', ensureUI);\n\n  try {\n    const mo = new MutationObserver(() => {\n      if(!UI_CLOSED && !document.getElementById('jhon-rec')) ensureUI();\n    });\n    const startMO = () => { if(document.body) mo.observe(document.body, { childList: true }); };\n    if(document.body) startMO(); else document.addEventListener('DOMContentLoaded', startMO);\n  } catch(e){ console.warn('[JHON REC] MutationObserver gagal:', e); }\n\n  console.log('[JHON RECORDER v3.6] Loaded');\n  console.log('[JHON REC] Console: _jhonDebug() / _jhonRec() / _jhonLogs()');\n\n})();\n";
+
+/* ============================================================
+   STEP CLEANER
+   ============================================================ */
+function cleanSteps(steps, autoRemoveLink, previewWait){
+  const norm = [];
+  for (const s of steps) {
+    if (s.type === 'TYPE') {
+      norm.push({
+        type: 'TYPE',
+        selector: s.selector || 'div[contenteditable=true]',
+        value: 'POST_CONTENT',
+        url: '',
+        autoRemoveLink: false,
+        previewWait: previewWait || 3
+      });
+    } else if (s.type === 'CLICK') {
+      const sel = (s.selector || '').toLowerCase();
+      const isNavigation = /page profile content|profile content|lihat konten profil|beranda|feed/i.test(sel);
+      if (isNavigation) continue;
+      const selTxt = sel + ' ' + String(s.text || '').toLowerCase();
+      const isOpenComposer = /create a post|create post|buat postingan|status update|status baru|what.*mind|write something|apa yang (anda|kamu) pikirkan/i.test(selTxt);
+      const isPostButton = s.selector === 'POST_BUTTON_REAL' ||
+        (/posting|bagikan|share|kirim|submit|\bpost\b/i.test(sel) && !isOpenComposer);
+      const clickStep = {
+        type: 'CLICK',
+        selector: isPostButton ? 'POST_BUTTON_REAL' : s.selector,
+        value: '',
+        url: ''
+      };
+      if (s.text) clickStep.text = s.text;
+      norm.push(clickStep);
+    } else {
+      norm.push({ type: s.type, selector: s.selector, value: s.value || '', url: '' });
+    }
+  }
+  const out = [];
+  let hasTyped = false;
+  let pendingPostIdx = -1;
+  for (const s of norm) {
+    if (s.type === 'TYPE') {
+      if (pendingPostIdx >= 0) { out.splice(pendingPostIdx, 1); pendingPostIdx = -1; }
+      hasTyped = true;
+      if (out.length && out[out.length-1].type === 'TYPE') out[out.length-1] = s;
+      else out.push(s);
+    } else if (s.selector === 'POST_BUTTON_REAL') {
+      if (!hasTyped) continue;
+      if (pendingPostIdx >= 0) out.splice(pendingPostIdx, 1);
+      out.push(s);
+      pendingPostIdx = out.length - 1;
+    } else {
+      out.push(s);
+    }
+  }
+  return out;
+}
+
+/* ============================================================
+   UNIVERSAL PLAYER v2.0 BUILDER
+   ============================================================ */
+function fnv(str){ let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); }
+function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, previewWait){
+  const runId = fnv(JSON.stringify(posts)) + '_' + posts.length;
+  const safe = o => JSON.stringify(o, null, 2).replace(/</g, '\\u003c');
+  const stepsJSON = safe(steps);
+  const postsJSON = safe(posts);
+  const dateVer = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const delayVal = (delay === 'auto' || !delay) ? 'auto' : parseInt(delay);
+  const speedVal = (typeSpeed === 0 || !typeSpeed) ? 'auto' : parseInt(typeSpeed);
+
+  const TPL = `// ==UserScript==
+// @name         JHON PLAYER
+// @namespace    jhon-player
+// @version      2.3.${dateVer}
+// @description  Auto post FB - Universal (Lemur/Android/Desktop)
+// @author       JHON
+// @match        *://*.facebook.com/*
+// @match        *://*.m.facebook.com/*
+// @noframes
+// @grant        none
+// @run-at       document-idle
+// ==/UserScript==
+
+(function(){
+  'use strict';
+  const UA = navigator.userAgent;
+  const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(UA);
+  const IS_LEMUR = /Lemur|Android/i.test(UA) && window.innerWidth > 700;
+  const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const IS_DESKTOP = !IS_MOBILE && !IS_TOUCH;
+  console.log('[JHON] Env:', { mobile: IS_MOBILE, lemur: IS_LEMUR, touch: IS_TOUCH, desktop: IS_DESKTOP });
+
+  const AUTO_DELAY = __DELAY__;
+  const AUTO_SPEED = __SPEED__;
+  const SET = {
+    delay: AUTO_DELAY === 'auto' ? (IS_LEMUR ? 12 : IS_MOBILE ? 10 : 5) : AUTO_DELAY,
+    typeSpeed: AUTO_SPEED === 'auto' ? (IS_LEMUR ? 50 : IS_MOBILE ? 40 : 20) : AUTO_SPEED,
+    previewWait: __PREVIEW__,
+    autoRemoveLink: __AUTOREMOVE__,
+    pollInterval: IS_LEMUR ? 1000 : IS_MOBILE ? 800 : 600
+  };
+  console.log('[JHON] SET:', SET);
+
+  const RECORDED_STEPS = __STEPS__;
+  const POSTS = __POSTS__;
+  let IDX = 0, RUN = false, savedComposer = null, LOGS = [], FAILS = 0, DONE_OK = 0, DONE_FAIL = 0, UI_CLOSED = false, _snapDone = false;
+  let UNSURE = 0, DONE_UNSURE = 0, POST_CLICKED = false;
+
+  const RUN_ID = __RUNID__;
+  const PKEY = 'jhon_prog_' + RUN_ID;
+  const LKEY = 'jhon_player_lock';
+  const TAB_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function lsGet(k){ try{ const r = localStorage.getItem(k); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  let PROG = lsGet(PKEY) || { idx: 0, sent: {}, pending: null };
+  if(!PROG.sent) PROG.sent = {};
+  IDX = Math.min(PROG.idx || 0, POSTS.length);
+  if(IDX >= POSTS.length) IDX = 0;
+  function saveProg(){ PROG.ts = Date.now(); return lsSet(PKEY, PROG); }
+  function sentCount(){ let n = 0; for(let i = 0; i < POSTS.length; i++) if(PROG.sent[i]) n++; return n; }
+  function lockAlive(){ const l = lsGet(LKEY); return !!(l && l.tab !== TAB_ID && (Date.now() - l.ts) < 15000); }
+  function beat(){ lsSet(LKEY, { tab: TAB_ID, ts: Date.now() }); }
+  function releaseLock(){ const l = lsGet(LKEY); if(l && l.tab === TAB_ID) lsDel(LKEY); }
+  window.addEventListener('beforeunload', releaseLock);
+  function resolvePending(){
+    if(PROG.pending === null || PROG.pending === undefined) return;
+    const p = PROG.pending;
+    PROG.sent[p] = 2; PROG.pending = null;
+    IDX = p + 1; if(IDX >= POSTS.length) IDX = 0;
+    PROG.idx = IDX; saveProg();
+    addLog('⚠️ Sesi lalu terputus saat mem-post #' + (p + 1) + '. Dianggap MUNGKIN terkirim → DILEWATI (anti dobel). Cek manual di FB.');
+  }
+  const sleep = m => new Promise(r => setTimeout(r, m));
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const URL_REGEX = /https?:\\/\\/[^\\s]+/gi;
+
+  function addLog(msg){
+    const t = new Date().toLocaleTimeString().slice(0,8);
+    LOGS.push('['+t+'] '+msg); if(LOGS.length>150) LOGS.shift();
+    const el = document.getElementById('jhon-logs');
+    if(el){ el.innerHTML = LOGS.slice(-40).map(l=>'<div>'+esc(l)+'</div>').join(''); el.scrollTop = el.scrollHeight; }
+    console.log('[JHON]', msg);
+  }
+
+  function snapshotDbg(tag){
+    try{
+      const dlgs=document.querySelectorAll('div[role="dialog"]').length;
+      const eds=Array.from(document.querySelectorAll('div[contenteditable="true"],textarea')).filter(e=>e.offsetParent!==null).length;
+      const dlg=getActiveDialog();
+      const btns=[];
+      (dlg||document).querySelectorAll('div[role="button"],button,[tabindex="0"]').forEach(b=>{
+        if(btns.length>=10||b.offsetParent===null) return;
+        const t=(b.textContent||'').replace(/\\s+/g,' ').trim().slice(0,20);
+        if(t) btns.push(t);
+      });
+      addLog('DBG['+tag+'] dialog='+dlgs+' aktif='+(dlg?'ya':'tidak')+' editable='+eds+' btn=['+btns.join(' | ')+']');
+    }catch(e){ addLog('DBG err '+e.message); }
+  }
+  function buildDebugText(){
+    return '=== JHON PLAYER DEBUG ===\\n'+
+      'Versi: 2.3.${dateVer}\\n'+
+      'URL: '+location.href+'\\n'+
+      'Env: '+(IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP')+' touch='+IS_TOUCH+'\\n'+
+      'UA: '+UA+'\\n'+
+      'SET: '+JSON.stringify(SET)+'\\n'+
+      'Post: '+(IDX+1)+'/'+POSTS.length+' sukses='+DONE_OK+' gagal='+DONE_FAIL+' berturut='+FAILS+'\\n\\n'+
+      '=== LOG ===\\n'+LOGS.join('\\n')+'\\n\\n'+
+      '=== STEPS ('+RECORDED_STEPS.length+') ===\\n'+JSON.stringify(RECORDED_STEPS,null,2);
+  }
+  function manualCopyModal(text){
+    try{
+      const old=document.getElementById('jhon-copymodal'); if(old) old.remove();
+      const m=document.createElement('div'); m.id='jhon-copymodal';
+      m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;';
+      const box=document.createElement('div');
+      box.style.cssText='max-width:600px;width:100%;background:#1a1a1a;border:2px solid #0ea5e9;border-radius:12px;padding:15px;color:#fff;font-family:monospace;';
+      const ti=document.createElement('div'); ti.style.cssText='font-size:13px;font-weight:bold;margin-bottom:10px;'; ti.textContent='📋 Copy Manual (Ctrl+A → Ctrl+C)';
+      const ta=document.createElement('textarea'); ta.value=text; ta.readOnly=true;
+      ta.style.cssText='width:100%;height:300px;background:#000;color:#0ea5e9;border:1px solid #333;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;';
+      const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;margin-top:10px;';
+      const b1=document.createElement('button'); b1.textContent='📝 Select All'; b1.style.cssText='flex:1;padding:10px;background:#0ea5e9;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;'; b1.onclick=()=>{ta.focus();ta.select();};
+      const b2=document.createElement('button'); b2.textContent='❌ Close'; b2.style.cssText='padding:10px 15px;background:#7f1d1d;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer;'; b2.onclick=()=>m.remove();
+      row.appendChild(b1); row.appendChild(b2); box.appendChild(ti); box.appendChild(ta); box.appendChild(row); m.appendChild(box); document.body.appendChild(m);
+      setTimeout(()=>{ta.focus();ta.select();},100);
+    }catch(e){ window.prompt('Copy manual:',text); }
+  }
+  function fallbackCopy(text,msg){
+    try{
+      const ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;top:0;left:0;width:2px;height:2px;opacity:0.01;padding:0;border:0;';
+      document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,text.length);
+      const ok=document.execCommand('copy'); document.body.removeChild(ta);
+      if(ok){ if(msg) alert(msg); return; }
+      throw new Error('execCommand false');
+    }catch(e){ manualCopyModal(text); }
+  }
+  function copyToClipboard(text,msg){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>{ if(msg) alert(msg); }).catch(()=>fallbackCopy(text,msg));
+    } else { fallbackCopy(text,msg); }
+  }
+  window._jhonPlayerDebug=function(){ const t=buildDebugText(); console.log(t); return t; };
+  window._jhonPlayerLogs=function(){ return LOGS; };
+  function isCommentContext(el){
+    let cur = el;
+    for(let i=0;i<15&&cur;i++){
+      if(!cur.getAttribute){cur=cur.parentElement;continue;}
+      const al=(cur.getAttribute('aria-label')||'').toLowerCase();
+      const cls=(typeof cur.className==='string'?cur.className:'').toLowerCase();
+      if(/comment|komentar|reply|balas|write a comment|tulis komentar|beri komentar/i.test(al)) return true;
+      if(/comment|komentar|reply/i.test(cls)) return true;
+      cur=cur.parentElement;
+    }
+    return false;
+  }
+  function findComposer(){
+    const all = document.querySelectorAll('div[contenteditable=true], textarea, div[role="textbox"]');
+    const cands=[];
+    for(const el of all){
+      if(el.offsetParent===null) continue;
+      const r=el.getBoundingClientRect();
+      if(r.width<150||r.height<15) continue;
+      if(isCommentContext(el)) continue;
+      const dlg=el.closest('div[role="dialog"]');
+      let score=0;
+      if(dlg) score+=50;
+      if(r.top<500) score+=30;
+      if(r.width>300) score+=20;
+      if(el.closest('[role="article"]')) score-=50;
+      cands.push({el,dlg,score,r});
+    }
+    if(!cands.length) return null;
+    cands.sort((a,b)=>b.score-a.score);
+    return { editable:cands[0].el, container:cands[0].dlg, postBtn:null, isDialog:!!cands[0].dlg };
+  }
+  function getActiveDialog(){
+    const all=Array.from(document.querySelectorAll('div[role="dialog"]')).filter(d=>{
+      const r=d.getBoundingClientRect(); return r.width>100&&r.height>100;
+    });
+    if(!all.length) return null;
+    const withEd=all.filter(d=>d.querySelector('div[contenteditable="true"], textarea'));
+    const pool=withEd.length?withEd:all;
+    return pool[pool.length-1];
+  }
+  function findSubmitBtn(quiet){
+    const dlg=getActiveDialog();
+    const scope=dlg||document;
+    const all=scope.querySelectorAll('div[role="button"], button, span[role="button"], [tabindex="0"]');
+    let postBtn=null,nextBtn=null,postArea=Infinity,nextArea=Infinity;
+    for(const b of all){
+      if(b.offsetParent===null) continue;
+      if(!dlg&&b.closest('[role="article"]')) continue;
+      const r=b.getBoundingClientRect();
+      if(r.width<30||r.height<18||r.width>800) continue;
+      let txt='';
+      for(const node of b.childNodes){ if(node.nodeType===3) txt+=node.textContent; }
+      if(!txt) txt=(b.textContent||'').replace(/\\s+/g,' ').trim();
+      txt=txt.trim().toLowerCase();
+      if(!txt||txt.length>25) continue;
+      const aria=(b.getAttribute('aria-label')||'').trim().toLowerCase();
+      if(/comment|komentar|reply|balas|cancel|batal|close|tutup|like|suka|edit|hapus|delete|save|simpan|back|kembali|prev|sebelumnya|add to|photo|foto|video|tag|check in|perasaan|feeling/i.test(txt)) continue;
+      if(/comment|komentar|reply|balas|cancel|batal|close|tutup/i.test(aria)) continue;
+      const isPost=/^(post|posting|bagikan|share|publish|kirim)$/.test(txt)||/^(post|posting|bagikan|share)$/.test(aria);
+      const isNext=/^(next|lanjut|berikutnya|selanjutnya)$/.test(txt);
+      const area=r.width*r.height;
+      if(isPost&&area<postArea){postBtn=b;postArea=area;}
+      if(isNext&&area<nextArea){nextBtn=b;nextArea=area;}
+    }
+    const where=dlg?' (dialog)':' (halaman)';
+    if(postBtn){if(!quiet) addLog('Btn: POST'+where); return postBtn;}
+    if(nextBtn){if(!quiet) addLog('Btn: NEXT'+where); return nextBtn;}
+    return null;
+  }
+  async function universalClick(el){
+    if(!el) return false;
+    try{
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      await sleep(400);
+      const rect=el.getBoundingClientRect();
+      const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+      let target=el;
+      if(IS_TOUCH){ try{ const vt=document.elementFromPoint(cx,cy); if(vt) target=vt; }catch(e){} }
+      try{ if(target.focus) target.focus(); }catch(e){}
+      await sleep(80);
+      const ptype=IS_TOUCH?'touch':'mouse';
+      const mo={bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy};
+      const po=Object.assign({pointerId:1,pointerType:ptype,isPrimary:true},mo);
+      let tch=null;
+      if(IS_TOUCH){
+        try{ tch=new Touch({identifier:Date.now(),target,clientX:cx,clientY:cy,pageX:cx+window.scrollX,pageY:cy+window.scrollY,screenX:cx,screenY:cy,radiusX:10,radiusY:10,rotationAngle:0,force:1}); }catch(e){}
+      }
+      try{ target.dispatchEvent(new MouseEvent('mouseover',mo)); }catch(e){}
+      try{ target.dispatchEvent(new PointerEvent('pointerdown',Object.assign({button:0,buttons:1},po))); }catch(e){}
+      if(tch){ try{ target.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,cancelable:true,view:window,touches:[tch],targetTouches:[tch],changedTouches:[tch]})); }catch(e){} }
+      await sleep(50);
+      try{ target.dispatchEvent(new MouseEvent('mousedown',Object.assign({button:0,buttons:1},mo))); }catch(e){}
+      try{ target.dispatchEvent(new PointerEvent('pointerup',Object.assign({button:0,buttons:0},po))); }catch(e){}
+      if(tch){ try{ target.dispatchEvent(new TouchEvent('touchend',{bubbles:true,cancelable:true,view:window,touches:[],targetTouches:[],changedTouches:[tch]})); }catch(e){} }
+      try{ target.dispatchEvent(new MouseEvent('mouseup',Object.assign({button:0,buttons:0},mo))); }catch(e){}
+      target.dispatchEvent(new MouseEvent('click',Object.assign({button:0,detail:1},mo)));
+      addLog('→ click sent');
+      return true;
+    }catch(e){ addLog('click ERR: '+e.message); return false; }
+  }
+  function findCreatePostBtn(hint){
+    const labels=['Create a post','Create post','Buat postingan','Posting status baru','Post a status update',"What's on your mind?",'What\\u2019s on your mind?','Apa yang Anda pikirkan?','Write something...'];
+    for(const lbl of labels){
+      const clean=lbl.replace(/"/g,'');
+      const cands=document.querySelectorAll('[aria-label*="'+clean+'"]');
+      for(const c of cands){
+        if(c.offsetParent===null) continue;
+        const r=c.getBoundingClientRect();
+        if(r.width<50||r.height<20) continue;
+        let target=c;
+        for(let i=0;i<10&&target;i++){
+          if(target.getAttribute('role')==='button'||target.getAttribute('tabindex')==='0') return target;
+          target=target.parentElement;
+        }
+        return c;
+      }
+    }
+    const allBtns=document.querySelectorAll('div[role="button"]');
+    for(const b of allBtns){
+      if(b.offsetParent===null) continue;
+      const txt=(b.textContent||'').toLowerCase();
+      if(/what.*on your mind|apa yang anda pikirkan|create a post|buat postingan|write something/i.test(txt)){
+        const r=b.getBoundingClientRect();
+        if(r.width>200&&r.height>30) return b;
+      }
+    }
+    const reOpen=/^(apa yang (anda|kamu) pikirkan|what.?s on your mind|buat postingan|create a post|create post|write something)/i;
+    const hintL=String(hint||'').toLowerCase();
+    let best=null,bestArea=Infinity;
+    const els=document.querySelectorAll('div,span');
+    for(const e of els){
+      if(e.offsetParent===null) continue;
+      const t=(e.textContent||'').trim();
+      if(!t||t.length>80) continue;
+      if(!(reOpen.test(t)||(hintL&&t.toLowerCase().indexOf(hintL)===0))) continue;
+      if(isCommentContext(e)) continue;
+      if(e.closest('div[role="dialog"]')) continue;
+      const r=e.getBoundingClientRect();
+      if(r.width<200||r.height<30) continue;
+      const a=r.width*r.height;
+      if(a<bestArea){best=e;bestArea=a;}
+    }
+    if(best) addLog('Composer via teks');
+    return best;
+  }
+  function hideKeyboard(){
+    try{
+      if(document.activeElement) document.activeElement.blur();
+      document.querySelectorAll('[contenteditable=true]').forEach(el=>el.blur());
+    }catch(e){}
+  }
+  function normTxt(s){ return String(s||'').replace(/\\s+/g,' ').trim(); }
+  async function clearEditor(el){
+    try{ el.focus(); document.execCommand('selectAll'); document.execCommand('delete'); }catch(e){}
+    await sleep(150);
+    let n=0, stuck=0, prev=(el.textContent||'').length;
+    if((el.textContent||'').trim().length>0) addLog('Composer berisi '+prev+'ch teks lama, dibersihkan...');
+    while((el.textContent||'').trim().length>0 && n<900){
+      n++;
+      try{
+        const sel=window.getSelection(); const r=document.createRange();
+        r.selectNodeContents(el); r.collapse(false);
+        sel.removeAllRanges(); sel.addRange(r);
+        document.execCommand('delete');
+      }catch(e){}
+      await sleep(30);
+      const now=(el.textContent||'').length;
+      if(now>=prev){ stuck++; if(stuck>=10){ addLog('⚠️ Gagal membersihkan composer (macet di '+now+'ch)'); return false; } } else { stuck=0; }
+      prev=now;
+    }
+    return true;
+  }
+  async function typeOne(el,text){
+    const isInput=(el.tagName==='TEXTAREA'||el.tagName==='INPUT');
+    const want=normTxt(text).slice(0,25);
+    addLog('Type: '+text.length+'ch');
+    if(isInput){
+      try{
+        const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;
+        const setter=Object.getOwnPropertyDescriptor(proto,'value').set;
+        setter.call(el,text);
+        el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:text}));
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+        setTimeout(()=>{try{el.blur();}catch(e){}},30);
+      }catch(e){}
+      await sleep(300);
+      return normTxt(el.value).indexOf(want)!==-1;
+    }
+    const has=()=>normTxt(el.textContent).indexOf(want)!==-1;
+    el.focus(); await sleep(120);
+    await clearEditor(el);
+    await sleep(100);
+    try{document.execCommand('insertText',false,text);}catch(e){}
+    await sleep(300);
+    if(has()){ addLog('Ketik: insertText OK'); return true; }
+    addLog('insertText belum masuk, coba per karakter');
+    await clearEditor(el);
+    for(let ch of text){
+      try{document.execCommand('insertText',false,ch);}catch(e){}
+      await sleep(SET.typeSpeed);
+    }
+    await sleep(300);
+    if(has()){ addLog('Ketik: per karakter OK'); return true; }
+    addLog('⚠️ Fallback textContent (cek tombol Berikutnya aktif atau tidak)');
+    try{
+      el.textContent=text;
+      el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:text}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+    }catch(e){}
+    await sleep(400);
+    return has();
+  }
+  function liveEditable(fallback){ try{ const f=findComposer(); if(f&&f.editable&&f.editable.offsetParent!==null) return f.editable; }catch(e){} return fallback; }
+  async function removeLinksFromField(el){
+    el=liveEditable(el);
+    const isInput=(el.tagName==='TEXTAREA'||el.tagName==='INPUT');
+    URL_REGEX.lastIndex=0;
+    if(isInput){
+      const cur=el.value||'';
+      const next=cur.replace(URL_REGEX,'').replace(/\\s+/g,' ').trim();
+      if(next===cur){addLog('No URL'); return;}
+      const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;
+      const setter=Object.getOwnPropertyDescriptor(proto,'value').set;
+      setter.call(el,next);
+      el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'deleteContentBackward'}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+      addLog('URL removed');
+      return;
+    }
+    const cur=(el.textContent||'').trim();
+    URL_REGEX.lastIndex=0;
+    const next=cur.replace(URL_REGEX,'').replace(/\\s+/g,' ').trim();
+    if(next===cur){addLog('No URL'); return;}
+    URL_REGEX.lastIndex=0;
+    const ms0=cur.match(URL_REGEX)||[];
+    URL_REGEX.lastIndex=0;
+    if(!ms0.length){ return; }
+    const lastU=ms0[ms0.length-1];
+    if(cur.slice(-lastU.length)!==lastU){ addLog('⚠️ URL tidak di ujung teks, dibiarkan (aman)'); return; }
+    const want=next.length;
+    const before=normTxt(el.textContent||'').length;
+    let stuck=0, prev=(el.textContent||'').length, n=0;
+    const maxN=lastU.length+20;
+    while(n<maxN && normTxt(el.textContent||'').length>want){
+      n++;
+      el=liveEditable(el);
+      try{
+        el.focus();
+        const sel=window.getSelection(); const r=document.createRange();
+        r.selectNodeContents(el); r.collapse(false);
+        sel.removeAllRanges(); sel.addRange(r);
+      }catch(e){}
+      await sleep(40);
+      try{document.execCommand('delete');}catch(e){}
+      await sleep(90);
+      const now=(el.textContent||'').length;
+      if(now>=prev){ stuck++; if(stuck>=6){ addLog('⚠️ Delete macet, berhenti'); break; } } else { stuck=0; }
+      prev=now;
+    }
+    const after=normTxt(el.textContent||'').length;
+    addLog('Hapus URL: '+before+'ch -> '+after+'ch ('+n+' hapus)');
+    if(!IS_TOUCH){ try{el.blur();}catch(e){} }
+  }
+  async function clickPostFlow(){
+    hideKeyboard(); await sleep(1000);
+    const ed=savedComposer&&savedComposer.editable;
+    const hadDlg=!!getActiveDialog();
+    const edGone=()=>ed?(!document.contains(ed)||ed.offsetParent===null):!findComposer();
+    let clicked=0; _snapDone=false;
+    for(let step=1;step<=8;step++){
+      await sleep(1500);
+      const btn=findSubmitBtn();
+      if(!btn){
+        addLog('Step '+step+': btn NULL'); if(!_snapDone){ _snapDone=true; snapshotDbg('submit'); }
+        const closed=hadDlg?!getActiveDialog():edGone();
+        if(closed){
+          if(clicked>0){addLog('Dialog tertutup setelah '+clicked+' klik'); return true;}
+          addLog('❌ Dialog tertutup tapi belum ada tombol yang diklik'); return false;
+        }
+        continue;
+      }
+      const btnText=(btn.textContent||'').trim().toLowerCase();
+      const isPost=/^(post|posting|bagikan|share|publish|kirim)$/.test(btnText);
+      addLog('Step '+step+': klik "'+btnText+'"');
+      if(isPost){ POST_CLICKED = true; PROG.pending = IDX; saveProg(); addLog('🔒 Post #' + (IDX + 1) + ' ditandai SEDANG DIKIRIM'); }
+      await universalClick(btn); clicked++;
+      await sleep(2200);
+      if(isPost){
+        for(let w=0;w<8;w++){
+          const closed=hadDlg?(!getActiveDialog()||!findSubmitBtn(true)):edGone();
+          if(closed){ addLog('✅ POST final, dialog tertutup'); return true; }
+          await sleep(1000);
+        }
+        addLog('⚠️ Dialog belum tertutup, status post TIDAK PASTI (tidak akan dikirim ulang otomatis)');
+        return false;
+      }
+      addLog('Next dipencet, tunggu...');
+    }
+    addLog('❌ Tombol final tidak ketemu'); snapshotDbg('final');
+    return false;
+  }
+  async function openComposer(hint){
+    const pre=findComposer();
+    if(pre&&pre.isDialog&&pre.editable){ addLog('Composer sudah terbuka'); return pre; }
+    for(let attempt=1;attempt<=3;attempt++){
+      addLog('Open composer (try '+attempt+'/3)');
+      const btn=findCreatePostBtn(hint);
+      if(btn){ addLog('Klik Create post...'); await universalClick(btn); }
+      else { addLog('❌ Btn NULL'); snapshotDbg('open'); }
+      let waited=0;
+      while(waited<15){
+        await sleep(SET.pollInterval);
+        waited+=SET.pollInterval/1000;
+        const found=findComposer();
+        if(found&&found.editable){ addLog('✅ Composer OK ('+waited.toFixed(1)+'s)'); return found; }
+      }
+      addLog('⚠️ Retry...');
+      await sleep(1500);
+    }
+    addLog('❌ GAGAL buka composer'); snapshotDbg('open-gagal');
+    return null;
+  }
+  async function doStep(step,postText){
+    if(step.type==='CLICK'){
+      const selL=(step.selector||'').toLowerCase();
+      const isPostClick=step.selector==='POST_BUTTON_REAL'||(/post|bagikan|share/.test(selL)&&!/status update|status baru|what.*mind|create a post|create post|buat postingan/i.test(selL));
+      const isOpen=/create a post|create post|buat postingan|what.*mind|write something|apa yang (anda|kamu) pikirkan/i.test((step.selector||'')+' '+(step.text||''));
+      if(isOpen){ const r=await openComposer(step.text); if(r){savedComposer=r; return true;} return false; }
+      if(isPostClick){ addLog('Flow post...'); const ok=await clickPostFlow(); savedComposer=null; return ok; }
+      let el=null;
+      for(let attempt=1;attempt<=3;attempt++){
+        el=document.querySelector(step.selector);
+        if(el&&el.offsetParent!==null) break;
+        addLog('CLICK retry '+attempt+'/3');
+        await sleep(1500);
+      }
+      if(el){ await universalClick(el); addLog('✅ Klik: '+(step.selector||'').slice(0,30)); await sleep(800); return true; }
+      addLog('❌ CLICK GAGAL');
+      return false;
+    } else if(step.type==='TYPE'){
+      addLog('Cari composer...');
+      let found=null;
+      if(savedComposer&&savedComposer.editable&&savedComposer.editable.offsetParent!==null){
+        found=savedComposer; addLog('Pakai saved composer');
+      } else {
+        let tries=0;
+        while(tries<30&&!found){
+          found=findComposer();
+          if(found&&found.editable) break;
+          if(tries%5===0) addLog('Try '+tries);
+          await sleep(SET.pollInterval);
+          tries++;
+        }
+      }
+      if(found&&found.editable){
+        savedComposer=found;
+        addLog('Composer OK');
+        const typed=await typeOne(found.editable,postText);
+        if(!typed){ addLog('❌ Teks gagal masuk composer'); return false; }
+        const actual=(found.editable.textContent||'').slice(0,30);
+        addLog('Isi: "'+actual+'"');
+        if(step.previewWait){
+          addLog('Tunggu preview ' + step.previewWait + 's (URL tetap)');
+          await sleep((step.previewWait||SET.previewWait)*1000);
+        }
+        {
+          URL_REGEX.lastIndex=0;
+          const exp=normTxt(postText).length;
+          URL_REGEX.lastIndex=0;
+          const act=normTxt(liveEditable(found.editable).textContent||'').length; addLog('Cek isi: '+act+'ch (target sekitar '+exp+'ch)');
+          const lim=exp*1.4+10;
+          if(exp>0&&act>lim){ addLog('❌ Isi editor '+act+'ch, seharusnya sekitar '+exp+'ch (teks dobel). Post ini di-skip, Post BELUM diklik.'); return false; }
+        }
+        await sleep(600);
+        return true;
+      }
+      addLog('❌ Composer GAK KETEMU'); snapshotDbg('type');
+      return false;
+    }
+    return true;
+  }
+  async function playOnePost(postText){
+    savedComposer=null; POST_CLICKED=false;
+    try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
+    await sleep(1200);
+    let okAll=true, stopped=false;
+    for(let s of RECORDED_STEPS){
+      if(!RUN){ stopped=true; break; }
+      let r;
+      try{ r=await doStep(s,postText); }catch(e){ addLog('❌ Step ERR: '+e.message); r=false; }
+      if(r===false){ addLog('❌ Step '+s.type+' gagal, post ini di-skip'); okAll=false; break; }
+    }
+    await sleep(3000);
+    if(stopped) return POST_CLICKED ? 'unsure' : 'stopped';
+    if(!okAll) return POST_CLICKED ? 'unsure' : 'fail';
+    return 'ok';
+  }
+  function makeUI(){
+    if(UI_CLOSED) return;
+    if(document.getElementById('jhon-player')) return;
+    if(!document.body) return;
+    const d=document.createElement('div'); d.id='jhon-player';
+    d.style.cssText='position:fixed;right:12px;bottom:80px;z-index:2147483647;background:#141414;border:2px solid #0ea5e9;border-radius:12px;width:340px;max-width:90vw;color:#fff;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+    const envLabel=IS_LEMUR?'LEMUR':(IS_MOBILE?'MOBILE':'DESKTOP');
+    d.innerHTML='<div id="jhon-player-header" style="padding:8px 10px;background:#1a1a1a;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none"><b style="font-size:11px">📢 JHON • '+POSTS.length+' post</b><span style="font-size:9px;color:#0ea5e9">'+envLabel+'</span></div>'+
+      '<div style="padding:10px">'+
+      '<div style="font-size:10px;color:#aaa">Ke <b id="jhon-idx" style="color:#fff">'+(IDX+1)+'/'+POSTS.length+'</b></div>'+
+      '<div style="font-size:9px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px">Next: <span id="jhon-cur" style="color:#ccc">'+(POSTS[IDX]||'').slice(0,40)+'...</span></div>'+
+      '<button id="jhon-play" style="width:100%;margin-top:10px;padding:12px;background:linear-gradient(135deg,#0ea5e9,#7C3AED);color:#fff;border:0;border-radius:8px;font-weight:800;cursor:pointer">▶ PLAY</button>'+
+      '<div style="display:flex;gap:4px;margin-top:6px">'+
+      '<button id="jhon-stop" style="display:none;flex:1;padding:6px;background:#7f1d1d;color:#fff;border:none;border-radius:6px;font-size:10px;cursor:pointer">STOP</button>'+
+      '<button id="jhon-close" style="padding:6px 10px;background:#222;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer">X</button></div>'+
+      '<div id="jhon-stat" style="font-size:9px;color:#0ea5e9;margin-top:6px;text-align:center">siap</div>'+
+      '<div id="jhon-prog" style="font-size:9px;color:#6ee7b7;margin-top:3px;text-align:center"></div>'+
+      '<div style="display:flex;gap:4px;margin-top:6px"><button id="jhon-copylog" style="flex:1;padding:6px;background:#7c3aed;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer">📄 Copy Debug</button><button id="jhon-clearlog" style="padding:6px 10px;background:#222;color:#fff;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer">🗑️ Clear</button><button id="jhon-reset" style="padding:6px 10px;background:#222;color:#fca5a5;border:1px solid #333;border-radius:6px;font-size:10px;cursor:pointer">🔄 Reset</button></div>'+
+      '<div style="font-size:9px;color:#888;margin-top:6px">🐛 DEBUG LOG:</div>'+
+      '<div id="jhon-logs" style="font-size:9px;color:#888;margin-top:3px;max-height:220px;overflow:auto;background:#000;padding:6px;border-radius:6px;font-family:monospace;line-height:1.4">— log —</div></div>';
+    document.body.appendChild(d);
+    (function(){
+      const head=d.querySelector('#jhon-player-header');
+      let dragging=false,sx=0,sy=0,sl=0,st=0;
+      head.addEventListener('pointerdown',function(e){
+        if(e.target.tagName==='BUTTON') return;
+        dragging=true;sx=e.clientX;sy=e.clientY;
+        const r=d.getBoundingClientRect();sl=r.left;st=r.top;
+        head.style.cursor='grabbing';
+        try{head.setPointerCapture(e.pointerId);}catch(_){}
+        e.preventDefault();
+      });
+      head.addEventListener('pointermove',function(e){
+        if(!dragging) return;
+        d.style.left=(sl+e.clientX-sx)+'px';
+        d.style.top=(st+e.clientY-sy)+'px';
+        d.style.right='auto';d.style.bottom='auto';
+      });
+      function endDrag(e){
+        if(!dragging) return;
+        dragging=false;head.style.cursor='grab';
+        try{head.releasePointerCapture(e.pointerId);}catch(_){}
+      }
+      head.addEventListener('pointerup',endDrag);
+      head.addEventListener('pointercancel',endDrag);
+    })();
+    const cur=d.querySelector('#jhon-cur'),idxEl=d.querySelector('#jhon-idx'),stat=d.querySelector('#jhon-stat'),playBtn=d.querySelector('#jhon-play'),stopBtn=d.querySelector('#jhon-stop');
+    d.querySelector('#jhon-close').onclick=()=>{RUN=false; UI_CLOSED=true; releaseLock(); d.remove();};
+    d.querySelector('#jhon-copylog').onclick=()=>{ copyToClipboard(buildDebugText(),'✅ Debug ter-copy!'); };
+    d.querySelector('#jhon-clearlog').onclick=()=>{ LOGS=[]; const el=document.getElementById('jhon-logs'); if(el) el.innerHTML='— log —'; };
+    stopBtn.onclick=()=>{RUN=false;playBtn.style.display='block';stopBtn.style.display='none';playBtn.textContent='▶ PLAY';stat.textContent='stopped';};
+    const progEl=d.querySelector('#jhon-prog');
+    function refreshProg(){ if(progEl) progEl.textContent='tercatat terkirim '+sentCount()+'/'+POSTS.length+' (disimpan di browser)'; }
+    d.querySelector('#jhon-reset').onclick=()=>{
+      if(RUN){ alert('STOP dulu sebelum reset.'); return; }
+      if(!confirm('Reset progress? Semua post dianggap BELUM terkirim, jadi bisa terkirim ULANG (dobel). Lanjut?')) return;
+      PROG={ idx:0, sent:{}, pending:null }; IDX=0; UNSURE=0; saveProg();
+      idxEl.textContent='1/'+POSTS.length; cur.textContent=(POSTS[0]||'').slice(0,40)+'...';
+      stat.textContent='progress direset'; refreshProg(); addLog('🔄 Progress direset');
+    };
+    let hb=null;
+    playBtn.onclick=async()=>{
+      if(RUN) return;
+      if(lockAlive()){ addLog('⛔ Ada player lain yang sedang jalan (tab/script lain). Tutup dulu supaya tidak dobel. Kalau baru reload, tunggu 15 detik.'); stat.textContent='⛔ player lain aktif'; return; }
+      if(!lsSet('jhon_probe',1)) addLog('⚠️ localStorage tidak bisa ditulis — anti-dobel antar-reload TIDAK aktif');
+      { const fresh=lsGet(PKEY); if(fresh){ PROG=fresh; if(!PROG.sent) PROG.sent={}; IDX=Math.min(PROG.idx||0,POSTS.length); if(IDX>=POSTS.length) IDX=0; idxEl.textContent=(IDX+1)+'/'+POSTS.length; } }
+      resolvePending();
+      if(sentCount()>=POSTS.length){ addLog('✅ Semua post sudah tercatat terkirim. Klik Reset kalau memang mau ulang.'); stat.textContent='sudah selesai'; refreshProg(); return; }
+      if(IDX>=POSTS.length) IDX=0;
+      RUN=true;FAILS=0;UNSURE=0;playBtn.style.display='none';stopBtn.style.display='block';
+      beat(); hb=setInterval(beat,3000);
+      addLog('▶ START '+POSTS.length+' post (sudah terkirim: '+sentCount()+')');
+      while(RUN&&IDX<POSTS.length){
+        if(PROG.sent[IDX]){ addLog('⏭ Skip #'+(IDX+1)+' (sudah terkirim)'); IDX++; PROG.idx=IDX; saveProg(); continue; }
+        const post=POSTS[IDX];
+        cur.textContent=post.slice(0,40)+'...';
+        idxEl.textContent=(IDX+1)+'/'+POSTS.length;
+        stat.textContent='post '+(IDX+1);
+        addLog('=== POST '+(IDX+1)+' ===');
+        const res=await playOnePost(post);
+        PROG.pending=null;
+        if(res==='stopped'){ saveProg(); addLog('⏹ Dihentikan sebelum Post diklik. Post ini akan diulang saat PLAY.'); break; }
+        if(res==='ok'){ PROG.sent[IDX]=1; FAILS=0; UNSURE=0; DONE_OK++; }
+        else if(res==='unsure'){ PROG.sent[IDX]=2; UNSURE++; DONE_UNSURE++; addLog('⚠️ Post #'+(IDX+1)+' sudah diklik tapi tidak terkonfirmasi. TIDAK akan dikirim ulang. Cek manual di FB.'); }
+        else {
+          FAILS++; DONE_FAIL++;
+          addLog('⚠️ Post '+(IDX+1)+' GAGAL sebelum diklik ('+FAILS+' berturut-turut)');
+          if(FAILS>=3){ saveProg(); refreshProg(); addLog('⛔ 3 gagal berturut-turut, berhenti. PLAY LAGI mengulang post ini (aman, Post belum pernah diklik).'); stat.textContent='⛔ berhenti'; RUN=false; break; }
+        }
+        IDX++; PROG.idx=IDX; saveProg(); refreshProg();
+        if(res==='unsure'&&UNSURE>=2){ addLog('⛔ 2x tidak terkonfirmasi berturut-turut, berhenti. Cek Facebook dulu apakah post benar-benar terkirim.'); stat.textContent='⛔ cek FB'; RUN=false; break; }
+        if(IDX>=POSTS.length){ stat.textContent='selesai'; addLog('ALL DONE. sukses='+DONE_OK+' tidak-pasti='+DONE_UNSURE+' gagal='+DONE_FAIL); RUN=false; break; }
+        const wait=Math.round(SET.delay*(0.8+Math.random()*0.9)+Math.random()*5);
+        for(let i=wait;i>0&&RUN;i--){stat.textContent='next '+i+'s';await sleep(1000);}
+      }
+      if(hb){ clearInterval(hb); hb=null; }
+      releaseLock(); RUN=false; refreshProg();
+      playBtn.style.display='block';stopBtn.style.display='none';playBtn.textContent='▶ PLAY LAGI';
+    };
+    refreshProg();
+  }
+  function ensureUI(){ try{makeUI();}catch(e){console.error('[JHON] UI error',e);} }
+  ensureUI();
+  [300,800,1500,3000,5000].forEach(t=>setTimeout(ensureUI,t));
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ensureUI);
+  window.addEventListener('load',ensureUI);
+  setInterval(ensure
