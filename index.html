@@ -905,7 +905,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   const TPL = `// ==UserScript==
 // @name         JHON PLAYER
 // @namespace    jhon-player
-// @version      2.3.${dateVer}
+// @version      2.4.${dateVer}
 // @description  Auto post FB - Universal (Lemur/Android/Desktop)
 // @author       JHON
 // @match        *://*.facebook.com/*
@@ -993,7 +993,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   }
   function buildDebugText(){
     return '=== JHON PLAYER DEBUG ===\\n'+
-      'Versi: 2.3.${dateVer}\\n'+
+      'Versi: 2.4.${dateVer}\\n'+
       'URL: '+location.href+'\\n'+
       'Env: '+(IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP')+' touch='+IS_TOUCH+'\\n'+
       'UA: '+UA+'\\n'+
@@ -1221,6 +1221,67 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
       if(lines[i]){ try{ document.execCommand('insertText',false,lines[i]); }catch(e){} await sleep(120); }
     }
   }
+  const NL=String.fromCharCode(10);
+  function elLines(el){ return String(el.innerText||'').split(NL).map(normTxt).filter(Boolean); }
+  // Cek struktur editor: jumlah paragraf sama, awal tiap paragraf cocok, panjang total wajar (bukan dobel / terpotong)
+  function structInfo(el,lines){
+    const exp=lines.map(normTxt).filter(Boolean);
+    const got=elLines(el);
+    const expLen=exp.join(' ').length, gotLen=got.join(' ').length;
+    let ok=(got.length===exp.length)&&gotLen<=expLen*1.4+10&&gotLen>=expLen*0.8-5;
+    if(ok){ for(let i=0;i<exp.length;i++){ if(got[i].indexOf(exp[i].slice(0,20))!==0){ ok=false; break; } } }
+    return {ok:ok,n:got.length,need:exp.length,len:gotLen,exp:expLen};
+  }
+  async function settleStruct(el,lines,maxMs){
+    const t0=Date.now(); let r=structInfo(el,lines);
+    while(!r.ok&&Date.now()-t0<maxMs){ await sleep(150); r=structInfo(el,lines); }
+    if(r.ok){ await sleep(700); r=structInfo(el,lines); }
+    return r;
+  }
+  function pasteText(el,text){
+    try{
+      const dt=new DataTransfer(); dt.setData('text/plain',text);
+      el.focus();
+      el.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+      return true;
+    }catch(e){ return false; }
+  }
+  async function insertBreaks(el,lines){
+    for(let i=0;i<lines.length;i++){
+      if(i>0){
+        let ok=false;
+        try{ ok=document.execCommand('insertLineBreak'); }catch(e){}
+        if(!ok){ try{ el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertLineBreak'})); }catch(e){} }
+        await sleep(120);
+      }
+      if(lines[i]){ try{ document.execCommand('insertText',false,lines[i]); }catch(e){} await sleep(120); }
+    }
+  }
+  async function typeChars(el,lines){
+    for(let li=0;li<lines.length;li++){
+      if(li>0){ try{document.execCommand('insertParagraph');}catch(e){} await sleep(SET.typeSpeed); }
+      for(let ch of lines[li]){ try{document.execCommand('insertText',false,ch);}catch(e){} await sleep(SET.typeSpeed); }
+    }
+  }
+  // Ketik teks multi-paragraf: coba beberapa cara, TIAP cara diverifikasi. Kalau semua gagal -> post di-skip (tidak dikirim jelek)
+  async function typeMulti(el,text,lines){
+    const need=lines.filter(x=>x.trim()).length;
+    const order=['para','paste','break','char'];
+    for(let k=0;k<order.length;k++){
+      const st=order[k];
+      if(k>0){ await clearEditor(el); await sleep(200); }
+      addLog('Ketik multi-paragraf ['+st+'] '+need+' baris');
+      if(st==='para'){ await insertLines(el,lines); }
+      else if(st==='paste'){ if(!pasteText(el,text)){ addLog('paste tidak didukung, lanjut'); continue; } }
+      else if(st==='break'){ await insertBreaks(el,lines); }
+      else { await typeChars(el,lines); }
+      const r=await settleStruct(el,lines,st==='char'?2500:3500);
+      addLog('Struktur ['+st+']: '+r.n+'/'+r.need+' paragraf, '+r.len+'ch (target ~'+r.exp+'ch) '+(r.ok?'✅':'❌'));
+      if(r.ok) return true;
+    }
+    addLog('❌ Paragraf tidak bisa dibentuk rapi. Post di-skip (Post BELUM diklik) supaya tidak menyatu/terpotong.');
+    return false;
+  }
   async function typeOne(el,text){
     const isInput=(el.tagName==='TEXTAREA'||el.tagName==='INPUT');
     const want=normTxt(text).slice(0,25);
@@ -1245,8 +1306,8 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
     const multi=lines.length>1;
     const need=lines.filter(x=>x.trim()).length;
     const report=()=>{ if(multi){ const n=paraCount(el); addLog('Paragraf: '+n+'/'+need+(n<need?' ⚠️ ada baris yang menyatu':'')); } };
-    if(multi){ await insertLines(el,lines); }
-    else { try{document.execCommand('insertText',false,text);}catch(e){} }
+    if(multi){ return await typeMulti(el,text,lines); }
+    try{document.execCommand('insertText',false,text);}catch(e){}
     await sleep(300);
     if(has()){ addLog('Ketik: insertText OK'+(multi?' ('+lines.length+' baris)':'')); report(); return true; }
     addLog('insertText belum masuk, coba per karakter');
@@ -1429,6 +1490,23 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
           const act=normTxt(liveEditable(found.editable).textContent||'').length; addLog('Cek isi: '+act+'ch (target sekitar '+exp+'ch)');
           const lim=exp*1.4+10;
           if(exp>0&&act>lim){ addLog('❌ Isi editor '+act+'ch, seharusnya sekitar '+exp+'ch (teks dobel). Post ini di-skip, Post BELUM diklik.'); return false; }
+          if(exp>20&&act<exp*0.8-5){ addLog('❌ Isi editor cuma '+act+'ch, seharusnya sekitar '+exp+'ch (teks terpotong). Post ini di-skip, Post BELUM diklik.'); return false; }
+        }
+        {
+          const pl=String(postText).split(NL);
+          if(pl.filter(x=>x.trim()).length>1){
+            let sr=structInfo(liveEditable(found.editable),pl);
+            addLog('Cek struktur: '+sr.n+'/'+sr.need+' paragraf '+(sr.ok?'✅':'❌'));
+            if(!sr.ok){
+              addLog('⚠️ Struktur berubah setelah preview, ketik ulang...');
+              const again=await typeOne(liveEditable(found.editable),postText);
+              if(!again){ return false; }
+              await sleep((step.previewWait||SET.previewWait)*1000);
+              sr=structInfo(liveEditable(found.editable),pl);
+              addLog('Cek struktur ulang: '+sr.n+'/'+sr.need+' paragraf '+(sr.ok?'✅':'❌'));
+              if(!sr.ok){ addLog('❌ Struktur tetap tidak rapi. Post di-skip, Post BELUM diklik.'); return false; }
+            }
+          }
         }
         await sleep(600);
         return true;
@@ -1561,7 +1639,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ensureUI);
   window.addEventListener('load',ensureUI);
   setInterval(ensureUI,3000);
-  console.log('[JHON PLAYER v2.3.${dateVer}] Loaded | Env:', IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP');
+  console.log('[JHON PLAYER v2.4.${dateVer}] Loaded | Env:', IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP');
 })();`;
 
   return TPL
