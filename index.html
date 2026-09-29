@@ -115,7 +115,6 @@ pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px soli
 <div class="card">
 <h3>1️⃣ STEP CONFIG</h3>
 
-<!-- AUTOSAVE -->
 <div class="save-box">
   <div class="s-info">
     <div class="s-title">💾 Autosave Aktif</div>
@@ -213,7 +212,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px soli
 
 <div style="margin-top:12px;padding:10px;background:linear-gradient(135deg,#10b98115,#0ea5e915);border:1px solid #10b98140;border-radius:10px">
 <div style="font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:4px">✨ Universal Player</div>
-<div style="font-size:10px;color:#b8bfda;line-height:1.5">Script yang di-generate otomatis detect Lemur/Desktop/Mobile + handle flow Next→Post + anti-komentar.</div>
+<div style="font-size:10px;color:#b8bfda;line-height:1.5">Script yang di-generate otomatis detect Lemur/Desktop/Mobile + handle flow Next→Post + auto-format multi-baris.</div>
 </div>
 
 <h3 style="margin-top:16px">🎬 Rekaman Manual (opsional)</h3>
@@ -252,10 +251,31 @@ document.getElementById('envBadge').textContent = ENV_LABEL;
 console.log('[JHON] Env:', { mobile: IS_MOBILE, lemur: IS_LEMUR, touch: IS_TOUCH, desktop: IS_DESKTOP });
 
 /* ============================================================
-   USER TEMPLATES (localStorage)
+   AUTO FORMAT POST — PATCH 1
+   Pisahkan paragraf otomatis untuk format "High School Football Schedule"
+   ============================================================ */
+function autoFormatPost(text){
+  if(!text) return text;
+  let t = String(text).replace(/\s+/g, ' ').trim();
+
+  // Kalau sudah ada \n\n di data asli, jangan diubah
+  if(/\n\n/.test(text)) return t.replace(/[^\S\n]+/g, ' ').trim();
+
+  // 1) Line break setelah "High School Football Schedule"
+  t = t.replace(/(High School Football Schedule)\s+/i, '$1\n\n');
+  // 2) Line break setelah matchup "...Football" sebelum "The X varsity"
+  t = t.replace(/(Football)\s+(The\s+[\w\-\/]+)/i, '$1\n\n$2');
+  // Cleanup spasi berlebih
+  t = t.replace(/[^\S\n]+/g, ' ');
+  t = t.replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
+/* ============================================================
+   USER TEMPLATES
    ============================================================ */
 let USER_TEMPLATES = {};
-let activeTemplate = null; // nama template user
+let activeTemplate = null;
 
 function loadUserTemplates(){
   try {
@@ -614,14 +634,19 @@ function renderXlsPreview(){
   const sep = sepRaw === '\\n' ? '\n' : sepRaw;
   const colIdxs = checks.length ? checks : [0];
 
+  // PATCH 1: apply autoFormatPost ke tiap target
   state.target = state.rows
-    .map(r => colIdxs.map(ci => String(r[ci]||'').trim()).filter(Boolean).join(sep))
+    .map(r => {
+      let t = colIdxs.map(ci => String(r[ci]||'').trim()).filter(Boolean).join(sep);
+      t = autoFormatPost(t);
+      return t;
+    })
     .filter(Boolean);
 
   const colNames = colIdxs.map(ci => state.headers[ci]).join(' + ');
   let html = '<div class="hint">' + state.target.length + ' target (kolom: ' + escapeHtml(colNames) + '):</div>';
   state.target.slice(0,3).forEach((p,i) => {
-    html += '<div class="step">' + (i+1) + '. ' + escapeHtml(p.slice(0,140)) + (p.length>140?'...':'') + '</div>';
+    html += '<div class="step" style="white-space:pre-wrap">' + (i+1) + '. ' + escapeHtml(p.slice(0,180)) + (p.length>180?'...':'') + '</div>';
   });
   if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
   document.getElementById('xlsPreview').innerHTML = html;
@@ -634,7 +659,7 @@ function renderXlsPreviewFromState(){
   }
   let html = '<div class="hint">' + state.target.length + ' target (dari autosave — re-upload Excel untuk edit kolom):</div>';
   state.target.slice(0,3).forEach((p,i) => {
-    html += '<div class="step">' + (i+1) + '. ' + escapeHtml(String(p).slice(0,140)) + (String(p).length>140?'...':'') + '</div>';
+    html += '<div class="step" style="white-space:pre-wrap">' + (i+1) + '. ' + escapeHtml(String(p).slice(0,180)) + (String(p).length>180?'...':'') + '</div>';
   });
   if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
   document.getElementById('xlsPreview').innerHTML = html;
@@ -694,7 +719,6 @@ function saveAuto(force){
 }
 function loadAuto(){
   try {
-    // Reload user templates (kalau ada tab lain yang update)
     USER_TEMPLATES = loadUserTemplates();
     const raw = localStorage.getItem(AUTOSAVE_KEY);
     if (!raw) { renderTemplates(); return; }
@@ -1142,6 +1166,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
     }
     return true;
   }
+  // PATCH 2: typeOne dengan dukungan multi-line (\\n jadi <br>)
   async function typeOne(el,text){
     const isInput=(el.tagName==='TEXTAREA'||el.tagName==='INPUT');
     const want=normTxt(text).slice(0,25);
@@ -1162,6 +1187,47 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
     el.focus(); await sleep(120);
     await clearEditor(el);
     await sleep(100);
+    // ==== MULTI-LINE HANDLING ====
+    const str = String(text);
+    const lines = str.split('\\n');
+    if(lines.length > 1){
+      addLog('Multi-line: ' + lines.length + ' baris');
+      for(let i = 0; i < lines.length; i++){
+        if(i > 0){
+          try{
+            if(!document.execCommand('insertLineBreak')){
+              document.execCommand('insertHTML', false, '<br>');
+            }
+          }catch(e){
+            try{ document.execCommand('insertHTML', false, '<br>'); }catch(e2){}
+          }
+          await sleep(80);
+        }
+        if(lines[i]){
+          try{ document.execCommand('insertText', false, lines[i]); }catch(e){}
+          await sleep(150);
+        }
+      }
+      await sleep(400);
+      if(has()){ addLog('Ketik: multi-line OK (' + lines.length + ' baris)'); return true; }
+      addLog('Multi-line gagal, coba per karakter');
+      await clearEditor(el);
+      for(let ch of str){
+        if(ch === '\\n'){
+          try{
+            if(!document.execCommand('insertLineBreak')){
+              document.execCommand('insertHTML', false, '<br>');
+            }
+          }catch(e){}
+        } else {
+          try{document.execCommand('insertText',false,ch);}catch(e){}
+        }
+        await sleep(SET.typeSpeed);
+      }
+      await sleep(300);
+      if(has()){ addLog('Ketik: per karakter (multi-line) OK'); return true; }
+    }
+    // ==== SINGLE LINE ====
     try{document.execCommand('insertText',false,text);}catch(e){}
     await sleep(300);
     if(has()){ addLog('Ketik: insertText OK'); return true; }
@@ -1526,7 +1592,7 @@ document.getElementById('btnGen').onclick = () => {
       '✅ Generate OK! ' + cleaned.length + ' step + ' + targets.length +
       ' post | Universal v2.0 | Delay: ' + (delayInput || 'auto') +
       ' | Speed: ' + (typeSpeedInput === 0 ? 'auto' : typeSpeedInput + 'ms') +
-      ' | Anti-dobel aktif | URL dibiarkan (auto-hapus OFF)';
+      ' | Multi-line support AKTIF | URL dibiarkan (auto-hapus OFF)';
   } catch(e) {
     alert('Generate error: ' + e.message);
     console.error(e);
@@ -1579,6 +1645,7 @@ console.log('🔑 License key:', LICENSE_CACHE_KEY);
 console.log('💾 Autosave key:', AUTOSAVE_KEY);
 console.log('💾 User templates key:', USER_TPL_KEY);
 console.log('📋 User templates:', Object.keys(USER_TEMPLATES).length);
+console.log('✨ autoFormatPost() aktif + Player multi-line support');
 </script>
 </body>
 </html>
