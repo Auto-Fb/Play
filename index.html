@@ -115,6 +115,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px soli
 <div class="card">
 <h3>1️⃣ STEP CONFIG</h3>
 
+<!-- AUTOSAVE -->
 <div class="save-box">
   <div class="s-info">
     <div class="s-title">💾 Autosave Aktif</div>
@@ -174,6 +175,11 @@ pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px soli
 </select>
 </div>
 
+<div class="link-box" style="margin-top:8px">
+<label><input type="checkbox" id="fmtPost" checked onchange="fmtChanged()"><b>✨ Format rapi (pecah jadi paragraf)</b></label>
+<div class="hint" style="color:#7dd3fc;margin-top:4px">Excel dengan kolom state_schedule_title / home_team / … / watch_link otomatis dijadikan 3 paragraf (judul / lawan / keterangan+hashtag+link). Teks satu kolom dengan pola yang sama juga dipecah. Teks yang sudah punya baris baru tidak diubah.</div>
+<div id="fmtPreview" style="display:none;margin-top:6px;padding:8px;background:#0a0a0a;border-radius:6px;font-size:10px;color:#ccc;white-space:pre-wrap;border-left:3px solid #10b981"></div>
+</div>
 <div class="link-box" style="opacity:.75">
 <label><input type="checkbox" id="autoRemoveLink" disabled><b>🔗 Auto-hapus URL</b> <span style="color:#f59e0b;font-size:10px">(OFF)</span></label>
 <div class="hint" style="color:#fca5a5;margin-top:4px">⚠️ URL dibiarkan. Preview muncul, link tetap ada di text.</div>
@@ -212,7 +218,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#14172a;border:1px soli
 
 <div style="margin-top:12px;padding:10px;background:linear-gradient(135deg,#10b98115,#0ea5e915);border:1px solid #10b98140;border-radius:10px">
 <div style="font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:4px">✨ Universal Player</div>
-<div style="font-size:10px;color:#b8bfda;line-height:1.5">Script yang di-generate otomatis detect Lemur/Desktop/Mobile + handle flow Next→Post + auto-format multi-baris.</div>
+<div style="font-size:10px;color:#b8bfda;line-height:1.5">Script yang di-generate otomatis detect Lemur/Desktop/Mobile + handle flow Next→Post + anti-komentar.</div>
 </div>
 
 <h3 style="margin-top:16px">🎬 Rekaman Manual (opsional)</h3>
@@ -251,31 +257,10 @@ document.getElementById('envBadge').textContent = ENV_LABEL;
 console.log('[JHON] Env:', { mobile: IS_MOBILE, lemur: IS_LEMUR, touch: IS_TOUCH, desktop: IS_DESKTOP });
 
 /* ============================================================
-   AUTO FORMAT POST — PATCH 1
-   Pisahkan paragraf otomatis untuk format "High School Football Schedule"
-   ============================================================ */
-function autoFormatPost(text){
-  if(!text) return text;
-  let t = String(text).replace(/\s+/g, ' ').trim();
-
-  // Kalau sudah ada \n\n di data asli, jangan diubah
-  if(/\n\n/.test(text)) return t.replace(/[^\S\n]+/g, ' ').trim();
-
-  // 1) Line break setelah "High School Football Schedule"
-  t = t.replace(/(High School Football Schedule)\s+/i, '$1\n\n');
-  // 2) Line break setelah matchup "...Football" sebelum "The X varsity"
-  t = t.replace(/(Football)\s+(The\s+[\w\-\/]+)/i, '$1\n\n$2');
-  // Cleanup spasi berlebih
-  t = t.replace(/[^\S\n]+/g, ' ');
-  t = t.replace(/\n{3,}/g, '\n\n');
-  return t.trim();
-}
-
-/* ============================================================
-   USER TEMPLATES
+   USER TEMPLATES (localStorage)
    ============================================================ */
 let USER_TEMPLATES = {};
-let activeTemplate = null;
+let activeTemplate = null; // nama template user
 
 function loadUserTemplates(){
   try {
@@ -622,6 +607,11 @@ function loadSheet(name){
   const firstChk = colCheckWrap.querySelector('input[value="' + autoIdx + '"]');
   if (firstChk) firstChk.checked = true;
   document.getElementById('colCheckAll').checked = false;
+  if (detectSchema(headers)) {
+    colCheckWrap.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = true; });
+    document.getElementById('colCheckAll').checked = true;
+    logXls('✔ Kolom jadwal terdeteksi → semua kolom dicentang, format 3 paragraf otomatis');
+  }
   document.getElementById('colSelWrap').style.display = 'block';
   renderXlsPreview();
   logXls('Sheet ' + name + ': ' + rows.length + ' baris, ' + headers.length + ' kolom');
@@ -634,22 +624,22 @@ function renderXlsPreview(){
   const sep = sepRaw === '\\n' ? '\n' : sepRaw;
   const colIdxs = checks.length ? checks : [0];
 
-  // PATCH 1: apply autoFormatPost ke tiap target
+  const fmtCbX = document.getElementById('fmtPost');
+  const groupOf = (fmtCbX && fmtCbX.checked) ? detectSchema(state.headers) : null;
   state.target = state.rows
-    .map(r => {
-      let t = colIdxs.map(ci => String(r[ci]||'').trim()).filter(Boolean).join(sep);
-      t = autoFormatPost(t);
-      return t;
-    })
+    .map(r => groupOf
+      ? buildBySchema(r, colIdxs, groupOf)
+      : colIdxs.map(ci => String(r[ci]||'').trim()).filter(Boolean).join(sep))
     .filter(Boolean);
 
   const colNames = colIdxs.map(ci => state.headers[ci]).join(' + ');
   let html = '<div class="hint">' + state.target.length + ' target (kolom: ' + escapeHtml(colNames) + '):</div>';
   state.target.slice(0,3).forEach((p,i) => {
-    html += '<div class="step" style="white-space:pre-wrap">' + (i+1) + '. ' + escapeHtml(p.slice(0,180)) + (p.length>180?'...':'') + '</div>';
+    html += '<div class="step" style="white-space:pre-wrap">' + (i+1) + '. ' + escapeHtml(p.slice(0,200)) + (p.length>200?'...':'') + '</div>';
   });
   if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
   document.getElementById('xlsPreview').innerHTML = html;
+  updateFmtPreview();
   saveAuto(false);
 }
 function renderXlsPreviewFromState(){
@@ -659,10 +649,11 @@ function renderXlsPreviewFromState(){
   }
   let html = '<div class="hint">' + state.target.length + ' target (dari autosave — re-upload Excel untuk edit kolom):</div>';
   state.target.slice(0,3).forEach((p,i) => {
-    html += '<div class="step" style="white-space:pre-wrap">' + (i+1) + '. ' + escapeHtml(String(p).slice(0,180)) + (String(p).length>180?'...':'') + '</div>';
+    html += '<div class="step">' + (i+1) + '. ' + escapeHtml(String(p).slice(0,140)) + (String(p).length>140?'...':'') + '</div>';
   });
   if (state.target.length > 3) html += '<small style="color:var(--dim)">+ ' + (state.target.length-3) + ' lagi...</small>';
   document.getElementById('xlsPreview').innerHTML = html;
+  updateFmtPreview();
 }
 
 /* ============================================================
@@ -719,6 +710,7 @@ function saveAuto(force){
 }
 function loadAuto(){
   try {
+    // Reload user templates (kalau ada tab lain yang update)
     USER_TEMPLATES = loadUserTemplates();
     const raw = localStorage.getItem(AUTOSAVE_KEY);
     if (!raw) { renderTemplates(); return; }
@@ -849,6 +841,57 @@ function cleanSteps(steps, autoRemoveLink, previewWait){
 /* ============================================================
    UNIVERSAL PLAYER v2.0 BUILDER
    ============================================================ */
+
+/* Format rapi berbasis KOLOM Excel: title | lawan | keterangan */
+const SCHEMA_G1 = ['home_team','home_nickname','sport1','vs','away_team','away_nickname','sport2'];
+function detectSchema(headers){
+  const h = (headers || []).map(x => String(x || '').trim().toLowerCase());
+  if (h.indexOf('home_team') < 0 || h.indexOf('away_team') < 0 || h.indexOf('game_description') < 0) return null;
+  return h.map(x => x === 'state_schedule_title' ? 0 : (SCHEMA_G1.indexOf(x) >= 0 ? 1 : 2));
+}
+function buildBySchema(row, colIdxs, groupOf){
+  const groups = [[], [], []];
+  colIdxs.forEach(ci => {
+    const v = String(row[ci] == null ? '' : row[ci]).replace(/\s+/g, ' ').trim();
+    if (v) groups[groupOf[ci] == null ? 2 : groupOf[ci]].push(v);
+  });
+  return groups.map(g => g.join(' ')).filter(Boolean).join('\n');
+}
+function fmtChanged(){
+  const hasCols = state.rows && state.rows.length && document.querySelector('#colCheckWrap input');
+  if (hasCols) renderXlsPreview(); else updateFmtPreview();
+  saveAuto(false);
+}
+function formatPost(t){
+  let s = String(t == null ? '' : t).replace(/\r/g, '').trim();
+  if (s.indexOf('\n') !== -1) return s;
+  const m = s.match(/^(.+? High School [A-Za-z]+ Schedule)\s+(.+)$/);
+  if (!m) return s;
+  const title = m[1].trim(), rest = m[2].trim();
+  const v = rest.search(/\svarsity\s+[A-Za-z]+\s+team\b/i);
+  const tidy = x => x.replace(/[ \t]{2,}/g, ' ').trim();
+  if (v < 0) return title + '\n' + tidy(rest);
+  const head = rest.slice(0, v), tail = rest.slice(v);
+  let cut = -1, from = 0, idx;
+  while ((idx = head.indexOf(' The ', from)) !== -1) {
+    const a = head.slice(0, idx).trim().toLowerCase();
+    const b = head.slice(idx + 5).trim().toLowerCase();
+    if (b && a.indexOf(b) === 0) { cut = idx; break; }
+    from = idx + 1;
+  }
+  if (cut < 0) cut = head.lastIndexOf(' The ');
+  if (cut < 0) return title + '\n' + tidy(rest);
+  const matchup = head.slice(0, cut).trim();
+  const desc = tidy(head.slice(cut + 1) + tail);
+  return title + '\n' + matchup + '\n' + desc;
+}
+function updateFmtPreview(){
+  const box = document.getElementById('fmtPreview'), cb = document.getElementById('fmtPost');
+  if (!box || !cb) return;
+  if (!cb.checked || !state.target || !state.target.length) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.textContent = formatPost(state.target[0]);
+}
 function fnv(str){ let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); }
 function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, previewWait){
   const runId = fnv(JSON.stringify(posts)) + '_' + posts.length;
@@ -1166,7 +1209,18 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
     }
     return true;
   }
-  // PATCH 2: typeOne dengan dukungan multi-line (\\n jadi <br>)
+  function paraCount(el){ return String(el.innerText||'').split('\\n').map(x=>x.trim()).filter(Boolean).length; }
+  async function insertLines(el,lines){
+    for(let i=0;i<lines.length;i++){
+      if(i>0){
+        let ok=false;
+        try{ ok=document.execCommand('insertParagraph'); }catch(e){}
+        if(!ok){ try{ el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertParagraph'})); }catch(e){} }
+        await sleep(120);
+      }
+      if(lines[i]){ try{ document.execCommand('insertText',false,lines[i]); }catch(e){} await sleep(120); }
+    }
+  }
   async function typeOne(el,text){
     const isInput=(el.tagName==='TEXTAREA'||el.tagName==='INPUT');
     const want=normTxt(text).slice(0,25);
@@ -1187,58 +1241,25 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
     el.focus(); await sleep(120);
     await clearEditor(el);
     await sleep(100);
-    // ==== MULTI-LINE HANDLING ====
-    const str = String(text);
-    const lines = str.split('\\n');
-    if(lines.length > 1){
-      addLog('Multi-line: ' + lines.length + ' baris');
-      for(let i = 0; i < lines.length; i++){
-        if(i > 0){
-          try{
-            if(!document.execCommand('insertLineBreak')){
-              document.execCommand('insertHTML', false, '<br>');
-            }
-          }catch(e){
-            try{ document.execCommand('insertHTML', false, '<br>'); }catch(e2){}
-          }
-          await sleep(80);
-        }
-        if(lines[i]){
-          try{ document.execCommand('insertText', false, lines[i]); }catch(e){}
-          await sleep(150);
-        }
-      }
-      await sleep(400);
-      if(has()){ addLog('Ketik: multi-line OK (' + lines.length + ' baris)'); return true; }
-      addLog('Multi-line gagal, coba per karakter');
-      await clearEditor(el);
-      for(let ch of str){
-        if(ch === '\\n'){
-          try{
-            if(!document.execCommand('insertLineBreak')){
-              document.execCommand('insertHTML', false, '<br>');
-            }
-          }catch(e){}
-        } else {
-          try{document.execCommand('insertText',false,ch);}catch(e){}
-        }
-        await sleep(SET.typeSpeed);
-      }
-      await sleep(300);
-      if(has()){ addLog('Ketik: per karakter (multi-line) OK'); return true; }
-    }
-    // ==== SINGLE LINE ====
-    try{document.execCommand('insertText',false,text);}catch(e){}
+    const lines=String(text).replace(/\\r/g,'').split('\\n');
+    const multi=lines.length>1;
+    const need=lines.filter(x=>x.trim()).length;
+    const report=()=>{ if(multi){ const n=paraCount(el); addLog('Paragraf: '+n+'/'+need+(n<need?' ⚠️ ada baris yang menyatu':'')); } };
+    if(multi){ await insertLines(el,lines); }
+    else { try{document.execCommand('insertText',false,text);}catch(e){} }
     await sleep(300);
-    if(has()){ addLog('Ketik: insertText OK'); return true; }
+    if(has()){ addLog('Ketik: insertText OK'+(multi?' ('+lines.length+' baris)':'')); report(); return true; }
     addLog('insertText belum masuk, coba per karakter');
     await clearEditor(el);
-    for(let ch of text){
-      try{document.execCommand('insertText',false,ch);}catch(e){}
-      await sleep(SET.typeSpeed);
+    for(let li=0;li<lines.length;li++){
+      if(li>0){ try{document.execCommand('insertParagraph');}catch(e){} await sleep(SET.typeSpeed); }
+      for(let ch of lines[li]){
+        try{document.execCommand('insertText',false,ch);}catch(e){}
+        await sleep(SET.typeSpeed);
+      }
     }
     await sleep(300);
-    if(has()){ addLog('Ketik: per karakter OK'); return true; }
+    if(has()){ addLog('Ketik: per karakter OK'); report(); return true; }
     addLog('⚠️ Fallback textContent (cek tombol Berikutnya aktif atau tidak)');
     try{
       el.textContent=text;
@@ -1578,6 +1599,12 @@ document.getElementById('btnGen').onclick = () => {
     const dupCount = targets.length - uniq.length;
     if (dupCount > 0 && confirm('Ada ' + dupCount + ' teks kembar (identik) di Excel. Kalau dibiarkan akan terposting DOBEL.\n\nOK = buang duplikat (disarankan)\nBatal = biarkan')) targets = uniq;
 
+    let fmtCount = 0;
+    const fmtCb = document.getElementById('fmtPost');
+    if (fmtCb && fmtCb.checked) {
+      targets = targets.map(t => { const f = formatPost(t); if (f !== t) fmtCount++; return f; });
+    }
+
     const player = buildUniversalPlayer(
       cleaned,
       targets,
@@ -1592,7 +1619,7 @@ document.getElementById('btnGen').onclick = () => {
       '✅ Generate OK! ' + cleaned.length + ' step + ' + targets.length +
       ' post | Universal v2.0 | Delay: ' + (delayInput || 'auto') +
       ' | Speed: ' + (typeSpeedInput === 0 ? 'auto' : typeSpeedInput + 'ms') +
-      ' | Multi-line support AKTIF | URL dibiarkan (auto-hapus OFF)';
+      ' | Anti-dobel aktif | URL dibiarkan (auto-hapus OFF) | Format rapi: ' + fmtCount + '/' + targets.length + ' post';
   } catch(e) {
     alert('Generate error: ' + e.message);
     console.error(e);
@@ -1645,7 +1672,6 @@ console.log('🔑 License key:', LICENSE_CACHE_KEY);
 console.log('💾 Autosave key:', AUTOSAVE_KEY);
 console.log('💾 User templates key:', USER_TPL_KEY);
 console.log('📋 User templates:', Object.keys(USER_TEMPLATES).length);
-console.log('✨ autoFormatPost() aktif + Player multi-line support');
 </script>
 </body>
 </html>
