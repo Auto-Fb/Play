@@ -905,7 +905,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   const TPL = `// ==UserScript==
 // @name         JHON PLAYER
 // @namespace    jhon-player
-// @version      2.4.${dateVer}
+// @version      2.5.${dateVer}
 // @description  Auto post FB - Universal (Lemur/Android/Desktop)
 // @author       JHON
 // @match        *://*.facebook.com/*
@@ -993,7 +993,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   }
   function buildDebugText(){
     return '=== JHON PLAYER DEBUG ===\\n'+
-      'Versi: 2.4.${dateVer}\\n'+
+      'Versi: 2.5.${dateVer}\\n'+
       'URL: '+location.href+'\\n'+
       'Env: '+(IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP')+' touch='+IS_TOUCH+'\\n'+
       'UA: '+UA+'\\n'+
@@ -1200,11 +1200,22 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
         const sel=window.getSelection(); const r=document.createRange();
         r.selectNodeContents(el); r.collapse(false);
         sel.removeAllRanges(); sel.addRange(r);
-        document.execCommand('delete');
+        for(let q=0;q<8;q++){ document.execCommand('delete'); }
       }catch(e){}
       await sleep(30);
       const now=(el.textContent||'').length;
-      if(now>=prev){ stuck++; if(stuck>=10){ addLog('⚠️ Gagal membersihkan composer (macet di '+now+'ch)'); return false; } } else { stuck=0; }
+      if(now>=prev){
+        stuck++;
+        if(stuck>=3&&now<=5){
+          try{
+            el.focus(); const s2=window.getSelection(); const r2=document.createRange();
+            r2.selectNodeContents(el); r2.collapse(true); s2.removeAllRanges(); s2.addRange(r2);
+            for(let q=0;q<=now;q++){ document.execCommand('forwardDelete'); }
+          }catch(e){}
+          await sleep(80);
+        }
+        if(stuck>=10){ addLog('⚠️ Gagal membersihkan composer (macet di '+now+'ch)'); return false; }
+      } else { stuck=0; }
       prev=now;
     }
     return true;
@@ -1263,10 +1274,26 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
       for(let ch of lines[li]){ try{document.execCommand('insertText',false,ch);}catch(e){} await sleep(SET.typeSpeed); }
     }
   }
+  async function fixLeadingJunk(el,lines){
+    const exp=lines.map(normTxt).filter(Boolean); const got=elLines(el);
+    if(!exp.length||got.length!==exp.length) return false;
+    const at=got[0].indexOf(exp[0].slice(0,20));
+    if(at<1||at>5) return false;
+    addLog('Ada '+at+' karakter sisa di awal, dibuang...');
+    for(let q=0;q<at;q++){
+      try{
+        el.focus(); const sel=window.getSelection(); const r=document.createRange();
+        r.selectNodeContents(el); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+        document.execCommand('forwardDelete');
+      }catch(e){}
+      await sleep(120);
+    }
+    return true;
+  }
   // Ketik teks multi-paragraf: coba beberapa cara, TIAP cara diverifikasi. Kalau semua gagal -> post di-skip (tidak dikirim jelek)
   async function typeMulti(el,text,lines){
     const need=lines.filter(x=>x.trim()).length;
-    const order=['para','paste','break','char'];
+    const order=['paste','para','break','char'];
     for(let k=0;k<order.length;k++){
       const st=order[k];
       if(k>0){ await clearEditor(el); await sleep(200); }
@@ -1275,7 +1302,8 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
       else if(st==='paste'){ if(!pasteText(el,text)){ addLog('paste tidak didukung, lanjut'); continue; } }
       else if(st==='break'){ await insertBreaks(el,lines); }
       else { await typeChars(el,lines); }
-      const r=await settleStruct(el,lines,st==='char'?2500:3500);
+      let r=await settleStruct(el,lines,st==='char'?2500:3500);
+      if(!r.ok){ const fx=await fixLeadingJunk(el,lines); if(fx){ r=await settleStruct(el,lines,2000); } }
       addLog('Struktur ['+st+']: '+r.n+'/'+r.need+' paragraf, '+r.len+'ch (target ~'+r.exp+'ch) '+(r.ok?'✅':'❌'));
       if(r.ok) return true;
     }
@@ -1639,7 +1667,7 @@ function buildUniversalPlayer(steps, posts, delay, typeSpeed, autoRemoveLink, pr
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ensureUI);
   window.addEventListener('load',ensureUI);
   setInterval(ensureUI,3000);
-  console.log('[JHON PLAYER v2.4.${dateVer}] Loaded | Env:', IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP');
+  console.log('[JHON PLAYER v2.5.${dateVer}] Loaded | Env:', IS_LEMUR?'LEMUR':IS_MOBILE?'MOBILE':'DESKTOP');
 })();`;
 
   return TPL
